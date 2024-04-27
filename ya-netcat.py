@@ -20,7 +20,7 @@ if __name__ == '__main__':
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=textwrap.dedent('''Example:
             netcat.py -t 1982.168.1.108 -p 5555 -l -c #command shell
-            netcat.py -t 192.168.1.108 -p 5555 -l -u=mytest.txt #download the file
+            netcat.py -t 192.168.1.108 -p 5555 -l -u=mytest.txt #upload the file
             netcat.py -t 192.168.1.108 -p 5555 -l -e=\"cat /etc/passwd\" #execute the command
             echo 'ABC' | ./netcat.py -t 192.168.1.108 -p 135 #send a text on the 135th port
             netcat.py -t 192.168.1.108 -p 5555 #connect to the server
@@ -54,3 +54,29 @@ class NetCat:
             self.listen()
         else:
             self.send()
+
+    def send(self):
+        self.socket.connect((self.args.target, self.args.port))
+        if self.buffer:
+            self.socket.send(self.buffer)
+        
+        try:
+            while True:
+                recv_len = 1
+                response = ''
+                while recv_len:
+                    data = self.socket.recv(4096)
+                    recv_len = len(data)
+                    response += data.decode()
+                    if recv_len < 4096:
+                        break
+                if response:
+                    print(response)
+                    buffer = input('> ')
+                    buffer == '\n'
+                    self.socket.send(buffer.encode())
+
+        except KeyboardInterrupt:
+            print('User terminated.')
+            self.socket.close()
+            sys.exit()
