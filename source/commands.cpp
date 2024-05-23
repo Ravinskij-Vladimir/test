@@ -48,13 +48,6 @@ void rav::printHelp()
   std::cout << "(for the source text, the text name is displayed instead of the encoding).\n";
 }
 
-
-std::ifstream::pos_type getFileSize(const std::string filename)
-{
-    std::ifstream in(filename, std::ios::ate | std::ios::binary);
-    return in.tellg(); 
-}
-
 constexpr int bitsInByte()
 {
   return 8;
@@ -208,10 +201,6 @@ void rav::addText(std::istream& in, fileTable& files)
   //copyFile(input, std::cout);
   files.insert({textName, fileName});
   input.close();
-  // for (auto it = files.cbegin(); it != files.cend(); it++)
-  // {
-  //   std::cout << it->first << ' ' << it->second << '\n';
-  // }
 }
 
 void rav::saveText(std::istream& in, fileTable& files)
@@ -278,9 +267,6 @@ void rav::createEncoding(std::istream& in, encodesTable& encodings, traverserTab
   readAlphabet(input, alphabet);
   rav::List<rav::nodePtr> tree;
   buildHuffmanTree(tree, alphabet, rav::NodeComparator());
-  // std::pair< std::string, rav::List< rav::nodePtr *>> item;
-  // item.first = encodingName;
-  // item.second = tree;
   traverses.insert({encodingName, tree});
   if (tree.empty())
   {
