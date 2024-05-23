@@ -6,123 +6,123 @@
 
 namespace ravinskij
 {
-  template< class D >
+  template< class T >
   class List;
-  template< class D >
-  class ListIterator: public std::iterator< std::bidirectional_iterator_tag, D >
+  template< class T >
+  class ListIterator: public std::iterator< std::bidirectional_iterator_tag, T >
   {
-    friend class List< D >;
+    friend class List< T >;
   public:
     ListIterator():
       node(nullptr)
     {}
-    ListIterator(const ListIterator< D >&) = default;
-    ListIterator< D >& operator=(const ListIterator< D >&) = default;
+    ListIterator(const ListIterator< T >&) = default;
+    ListIterator< T >& operator=(const ListIterator< T >&) = default;
     ~ListIterator() = default;
-    ListIterator< D >& operator++()
+    ListIterator< T >& operator++()
     {
       node = node->next_;
       return *this;
     }
-    ListIterator< D >& operator--()
+    ListIterator< T >& operator--()
     {
       node = node->prev_;
       return *this;
     }
-    ListIterator< D > operator++(int)
+    ListIterator< T > operator++(int)
     {
-      ListIterator< D > result(*this);
+      ListIterator< T > result(*this);
       ++(*this);
       return result;
     }
-    ListIterator< D > operator--(int)
+    ListIterator< T > operator--(int)
     {
-      ListIterator< D > result(*this);
+      ListIterator< T > result(*this);
       --(*this);
       return result;
     }
-    bool operator==(const ListIterator< D >& rhs) const
+    bool operator==(const ListIterator< T >& rhs) const
     {
       return node == rhs.node;
     }
-    bool operator!=(const ListIterator< D >& rhs) const
+    bool operator!=(const ListIterator< T >& rhs) const
     {
       return !(*this == rhs);
     }
-    D* operator->()
+    T* operator->()
     {
       return std::addressof(node->value_);
     }
-    D& operator*()
+    T& operator*()
     {
       return node->value_;
     }
-    const D* operator->() const
+    const T* operator->() const
     {
       return std::addressof(node->value_);
     }
-    const D& operator*() const
+    const T& operator*() const
     {
       return node->value_;
     }
   private:
-    detail::ListNode< D >* node;
-    explicit ListIterator(detail::ListNode< D >* nd):
+    detail::ListNode< T >* node;
+    explicit ListIterator(detail::ListNode< T >* nd):
       node(nd)
     {}
   };
-  template< class D >
-  class ConstListIterator: public std::iterator< std::bidirectional_iterator_tag, D >
+  template< class T >
+  class ConstListIterator: public std::iterator< std::bidirectional_iterator_tag, T >
   {
-    friend class List< D >;
+    friend class List< T >;
   public:
     ConstListIterator():
       node(nullptr)
     {}
-    ConstListIterator(const ConstListIterator< D >&) = default;
-    ConstListIterator< D >& operator=(const ConstListIterator< D >&) = default;
+    ConstListIterator(const ConstListIterator< T >&) = default;
+    ConstListIterator< T >& operator=(const ConstListIterator< T >&) = default;
     ~ConstListIterator() = default;
-    ConstListIterator< D >& operator++()
+    ConstListIterator< T >& operator++()
     {
       node = node->next_;
       return *this;
     }
-    ConstListIterator< D >& operator--()
+    ConstListIterator< T >& operator--()
     {
       node = node->prev_;
       return *this;
     }
-    ConstListIterator< D > operator++(int)
+    ConstListIterator< T > operator++(int)
     {
-      ConstListIterator< D > result(*this);
+      ConstListIterator< T > result(*this);
       ++(*this);
       return result;
     }
-    ConstListIterator< D > operator--(int)
+    ConstListIterator< T > operator--(int)
     {
-      ConstListIterator< D > result(*this);
+      ConstListIterator< T > result(*this);
       --(*this);
       return result;
     }
-    bool operator==(const ConstListIterator< D >& rhs) const
+    bool operator==(const ConstListIterator< T >& rhs) const
     {
       return node == rhs.node;
     }
-    bool operator!=(const ConstListIterator< D >& rhs) const
+    bool operator!=(const ConstListIterator< T >& rhs) const
     {
       return !(*this == rhs);
     }
-    const D* operator->() const
+    const T* operator->() const
     {
       return std::addressof(node->value_);
     }
-    const D& operator*() const
+    const T& operator*() const
     {
       return node->value_;
     }
   private:
-    detail::ListNode< D >* node;
-    explicit ConstListIterator(detail::ListNode< D >* nd):
+    detail::ListNode< T >* node;
+    explicit ConstListIterator(detail::ListNode< T >* nd):
       node(nd)
     {}
   };

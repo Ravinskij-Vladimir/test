@@ -4,6 +4,7 @@
 #include <memory>
 #include <initializer_list>
 #include <stdexcept>
+#include "treeNode.hpp"
 
 namespace ravinskij
 {
@@ -11,168 +12,168 @@ namespace ravinskij
   class Tree
   {
     using val_t = std::pair< const Key, T >;
-    struct Node;
+    //struct Node;
     Compare comparator_;
-    Node* fakeroot_;
+    TreeNode<Key, T>* fakeroot_;
     size_t size_;
-    struct Node
-    {
-      val_t val_;
-      int height_;
-      Node* left_;
-      Node* right_;
-      Node* parent_;
+    // struct TreeNode
+    // {
+    //   val_t val_;
+    //   int height_;
+    //   TreeNode<Key, T>* left_;
+    //   Node<Key, T>* right_;
+    //   Node<Key, T>* parent_;
 
-      Node():
-        val_(),
-        height_(0),
-        left_(nullptr),
-        right_(nullptr),
-        parent_(nullptr)
-      {}
-      template< class... Args  >
-      explicit Node(int height, Args&&... args):
-        val_(std::forward< Args >(args)...),
-        height_(height),
-        left_(nullptr),
-        right_(nullptr),
-        parent_(nullptr)
-      {}
-      Node(const Node& other):
-        val_(other.val_),
-        height_(0),
-        left_(nullptr),
-        right_(nullptr),
-        parent_(nullptr)
-      {}
-      Node(Node&& other):
-        val_(std::move(other.val_)),
-        height_(height_),
-        left_(other.left_),
-        right_(other.right_),
-        parent_(other.parent_)
-      {
-        other.height_ = 0;
-        other.left_ = nullptr;
-        other.right_ = nullptr;
-        other.parent_ = nullptr;
-      }
-      static int depth(Node* node)
-      {
-        return node ? node->height_ + 1 : 0;
-      }
-      void clear()
-      {
-        height_ = 0;
-        left_ = nullptr;
-        right_ = nullptr;
-        parent_ = nullptr;
-      }
-      bool updateHeight()
-      {
-        int old_height = height_;
-        height_ = std::max(depth(left_), depth(right_));
-        return old_height != height_;
-      }
-      void rotate()
-      {
-        Node* root = this;
-        Node* parent = root->parent_;
-        bool left = (root == parent->left_);
-        if (depth(left_) < depth(right_))
-        {
-          root = (depth(right_->left_) <= depth(right_->right_)) ? root->rotateLeft() : root->rotateLeftRight();
-        }
-        else
-        {
-          root = (depth(left_->right_) <= depth(left_->left_)) ? root->rotateRight() : root->rotateRightLeft();
-        }
-        root->parent_ = parent;
-        (left ? parent->left_ : parent->right_) = root;
-        return;
-      }
-    private:
-      Node* rotateLeft()
-      {
-        Node* root = this;
-        Node* new_root = root->right_;
-        root->right_ = new_root->left_;
-        if (new_root->left_)
-        {
-          new_root->left_->parent_ = root;
-        }
-        new_root->left_ = root;
-        root->parent_ = new_root;
-        root->updateHeight();
-        new_root->updateHeight();
-        return new_root;
-      }
-      Node* rotateRight()
-      {
-        Node* root = this;
-        Node* new_root = root->left_;
-        root->left_ = new_root->right_;
-        if (new_root->right_)
-        {
-          new_root->right_->parent_ = root;
-        }
-        new_root->right_ = root;
-        root->parent_ = new_root;
-        root->updateHeight();
-        new_root->updateHeight();
-        return new_root;
-      }
-      Node* rotateLeftRight()
-      {
-        Node* root = this;
-        Node* new_root = root->right_->left_;
-        root->right_->left_ = new_root->right_;
-        if (new_root->right_)
-        {
-          new_root->right_->parent_ = root->right_;
-        }
-        new_root->right_ = root->right_;
-        root->right_->parent_ = new_root;
-        root->right_ = new_root->left_;
-        if (new_root->left_)
-        {
-          new_root->left_->parent_ = root;
-        }
-        new_root->left_ = root;
-        root->parent_ = new_root;
-        root->updateHeight();
-        new_root->right_->updateHeight();
-        new_root->updateHeight();
-        return new_root;
-      }
-      Node* rotateRightLeft()
-      {
-        Node* root = this;
-        Node* new_root = root->left_->right_;
-        root->left_->right_ = new_root->left_;
-        if (new_root->left_)
-        {
-          new_root->left_->parent_ = root->left_;
-        }
-        new_root->left_ = root->left_;
-        root->left_->parent_ = new_root;
-        root->left_ = new_root->right_;
-        if (new_root->right_)
-        {
-          new_root->right_->parent_ = root;
-        }
-        new_root->right_ = root;
-        root->parent_ = new_root;
-        root->updateHeight();
-        new_root->left_->updateHeight();
-        new_root->updateHeight();
-        return new_root;
-      }
-    };
+    //   Node():
+    //     val_(),
+    //     height_(0),
+    //     left_(nullptr),
+    //     right_(nullptr),
+    //     parent_(nullptr)
+    //   {}
+    //   template< class... Args  >
+    //   explicit Node(int height, Args&&... args):
+    //     val_(std::forward< Args >(args)...),
+    //     height_(height),
+    //     left_(nullptr),
+    //     right_(nullptr),
+    //     parent_(nullptr)
+    //   {}
+    //   Node(const Node& other):
+    //     val_(other.val_),
+    //     height_(0),
+    //     left_(nullptr),
+    //     right_(nullptr),
+    //     parent_(nullptr)
+    //   {}
+    //   Node(Node&& other):
+    //     val_(std::move(other.val_)),
+    //     height_(height_),
+    //     left_(other.left_),
+    //     right_(other.right_),
+    //     parent_(other.parent_)
+    //   {
+    //     other.height_ = 0;
+    //     other.left_ = nullptr;
+    //     other.right_ = nullptr;
+    //     other.parent_ = nullptr;
+    //   }
+    //   static int depth(Node<Key, T>* node)
+    //   {
+    //     return node ? node->height_ + 1 : 0;
+    //   }
+    //   void clear()
+    //   {
+    //     height_ = 0;
+    //     left_ = nullptr;
+    //     right_ = nullptr;
+    //     parent_ = nullptr;
+    //   }
+    //   bool updateHeight()
+    //   {
+    //     int old_height = height_;
+    //     height_ = std::max(depth(left_), depth(right_));
+    //     return old_height != height_;
+    //   }
+    //   void rotate()
+    //   {
+    //     Node<Key, T>* root = this;
+    //     Node<Key, T>* parent = root->parent_;
+    //     bool left = (root == parent->left_);
+    //     if (depth(left_) < depth(right_))
+    //     {
+    //       root = (depth(right_->left_) <= depth(right_->right_)) ? root->rotateLeft() : root->rotateLeftRight();
+    //     }
+    //     else
+    //     {
+    //       root = (depth(left_->right_) <= depth(left_->left_)) ? root->rotateRight() : root->rotateRightLeft();
+    //     }
+    //     root->parent_ = parent;
+    //     (left ? parent->left_ : parent->right_) = root;
+    //     return;
+    //   }
+    // private:
+    //   Node<Key, T>* rotateLeft()
+    //   {
+    //     Node<Key, T>* root = this;
+    //     Node<Key, T>* new_root = root->right_;
+    //     root->right_ = new_root->left_;
+    //     if (new_root->left_)
+    //     {
+    //       new_root->left_->parent_ = root;
+    //     }
+    //     new_root->left_ = root;
+    //     root->parent_ = new_root;
+    //     root->updateHeight();
+    //     new_root->updateHeight();
+    //     return new_root;
+    //   }
+    //   Node<Key, T>* rotateRight()
+    //   {
+    //     Node<Key, T>* root = this;
+    //     Node<Key, T>* new_root = root->left_;
+    //     root->left_ = new_root->right_;
+    //     if (new_root->right_)
+    //     {
+    //       new_root->right_->parent_ = root;
+    //     }
+    //     new_root->right_ = root;
+    //     root->parent_ = new_root;
+    //     root->updateHeight();
+    //     new_root->updateHeight();
+    //     return new_root;
+    //   }
+    //   Node<Key, T>* rotateLeftRight()
+    //   {
+    //     Node<Key, T>* root = this;
+    //     Node<Key, T>* new_root = root->right_->left_;
+    //     root->right_->left_ = new_root->right_;
+    //     if (new_root->right_)
+    //     {
+    //       new_root->right_->parent_ = root->right_;
+    //     }
+    //     new_root->right_ = root->right_;
+    //     root->right_->parent_ = new_root;
+    //     root->right_ = new_root->left_;
+    //     if (new_root->left_)
+    //     {
+    //       new_root->left_->parent_ = root;
+    //     }
+    //     new_root->left_ = root;
+    //     root->parent_ = new_root;
+    //     root->updateHeight();
+    //     new_root->right_->updateHeight();
+    //     new_root->updateHeight();
+    //     return new_root;
+    //   }
+    //   Node<Key, T>* rotateRightLeft()
+    //   {
+    //     Node<Key, T>* root = this;
+    //     Node<Key, T>* new_root = root->left_->right_;
+    //     root->left_->right_ = new_root->left_;
+    //     if (new_root->left_)
+    //     {
+    //       new_root->left_->parent_ = root->left_;
+    //     }
+    //     new_root->left_ = root->left_;
+    //     root->left_->parent_ = new_root;
+    //     root->left_ = new_root->right_;
+    //     if (new_root->right_)
+    //     {
+    //       new_root->right_->parent_ = root;
+    //     }
+    //     new_root->right_ = root;
+    //     root->parent_ = new_root;
+    //     root->updateHeight();
+    //     new_root->left_->updateHeight();
+    //     new_root->updateHeight();
+    //     return new_root;
+    //   }
+    // };
    
-    Node* findHint(Node* root, const Key& key)
+    TreeNode<Key, T>* findHint(TreeNode<Key, T>* root, const Key& key)
     {
-      Node* cur = (root->height_ < 0) ? root->left_ : root;
+      TreeNode<Key, T>* cur = (root->height_ < 0) ? root->left_ : root;
       while (cur)
       {
         if (cur->val_.first == key)
@@ -199,9 +200,9 @@ namespace ravinskij
       return nullptr;
     }
 
-    const Node* findHint(Node* root, const Key& key) const
+    const TreeNode<Key, T>* findHint(TreeNode<Key, T>* root, const Key& key) const
     {
-      Node* cur = (root->height_ < 0) ? root->left_ : root;
+      TreeNode<Key, T>* cur = (root->height_ < 0) ? root->left_ : root;
       while (cur)
       {
         if (cur->val_.first == key)
@@ -227,37 +228,39 @@ namespace ravinskij
       }
       return nullptr;
     }
-    void rebalanceTree(Node* start)
+
+    void rebalanceTree(TreeNode<Key, T>* start)
     {
       using std::abs;
       using std::max;
       while (start && start->height_ != -1)
       {
-        int depth_diff = Node::depth(start->left_) - Node::depth(start->right_);
-        if (start->height_ == max(Node::depth(start->left_), Node::depth(start->right_)) && abs(depth_diff) < 2)
+        int depth_diff = TreeNode<Key, T>::depth(start->left_) - TreeNode<Key, T>::depth(start->right_);
+        if (start->height_ == max(TreeNode<Key, T>::depth(start->left_), TreeNode<Key, T>::depth(start->right_)) && abs(depth_diff) < 2)
         {
           return;
         }
-        Node* parent = start->parent_;
+        TreeNode<Key, T>* parent = start->parent_;
         if (abs(depth_diff) > 1)
         {
           start->rotate();
         }
         else
         {
-          start->height_ = max(Node::depth(start->left_), Node::depth(start->right_));
+          start->height_ = max(TreeNode<Key, T>::depth(start->left_), TreeNode<Key, T>::depth(start->right_));
         }
         start = parent;
       }
       return;
     }
-    void freeNodes(Node* root) noexcept
+
+    void freeNodes(TreeNode<Key, T>* root) noexcept
     {
       if (!root)
       {
         return;
       }
-      Node* cur = root;
+      TreeNode<Key, T>* cur = root;
       while (root->right_ || root->left_)
       {
         if (cur->right_)
@@ -284,7 +287,8 @@ namespace ravinskij
       }
       delete root;
     }
-    Node* addNode(Node* root, Node* hint, const Key& key, const T& new_val)
+
+    TreeNode<Key, T>* addNode(TreeNode<Key, T>* root, TreeNode<Key, T>* hint, const Key& key, const T& new_val)
     {
       if (!hint)
       {
@@ -292,7 +296,7 @@ namespace ravinskij
       }
       if (!hint)
       {
-        root->left_ = new Node(0, std::forward< val_t >(std::make_pair(key, new_val)));
+        root->left_ = new TreeNode<Key, T>(0, std::forward< val_t >(std::make_pair(key, new_val)));
         root->left_->parent_ = root;
         return root->left_;
       }
@@ -301,18 +305,19 @@ namespace ravinskij
         hint->val_.second = new_val;
         return hint;
       }
-      Node* new_node = new Node(0, std::forward< val_t >(std::make_pair(key, new_val)));
+      TreeNode<Key, T>* new_node = new TreeNode<Key, T>(0, std::forward< val_t >(std::make_pair(key, new_val)));
       (comparator_(hint->val_.first, key) ? hint->right_ : hint->left_) = new_node;
       new_node->parent_ = hint;
       rebalanceTree(hint);
       return new_node;
     }
-    void eraseNode(Node* for_del)
+
+    void eraseNode(TreeNode<Key, T>* for_del)
     {
-      Node* parent = for_del->parent_;
+      TreeNode<Key, T>* parent = for_del->parent_;
       if (!for_del->left_ || !for_del->right_)
       {
-        Node* child = (for_del->left_ ? for_del->left_ : for_del->right_);
+        TreeNode<Key, T>* child = (for_del->left_ ? for_del->left_ : for_del->right_);
         (for_del == parent->left_ ? parent->left_ : parent->right_) = child;
         if (child)
         {
@@ -322,9 +327,9 @@ namespace ravinskij
       }
       else
       {
-        Node* prev = for_del->left_;
+        TreeNode<Key, T>* prev = for_del->left_;
         for (; prev->right_; prev = prev->right_);
-        Node* prev_parent = prev->parent_;
+        TreeNode<Key, T>* prev_parent = prev->parent_;
         prev->right_ = for_del->right_;
         if (for_del->right_)
         {
@@ -342,8 +347,9 @@ namespace ravinskij
       }
       delete for_del;
     }
+
     template< typename InputIt >
-    Node* createTree(Node* fakeroot, InputIt begin, InputIt end, size_t& nmb_of_added)
+    TreeNode<Key, T>* createTree(TreeNode<Key, T>* fakeroot, InputIt begin, InputIt end, size_t& nmb_of_added)
     {
       nmb_of_added = 0;
       if (begin == end)
@@ -353,9 +359,9 @@ namespace ravinskij
       bool fake_given = fakeroot;
       if (!fakeroot)
       {
-        fakeroot_ = new Node(-1);
+        fakeroot_ = new TreeNode<Key, T>(-1);
       }
-      fakeroot->left_ = new Node(0, std::forward(*begin));
+      fakeroot->left_ = new TreeNode<Key, T>(0, std::forward(*begin));
       fakeroot->left_->parent_ = fakeroot;
       ++begin;
       ++nmb_of_added;
@@ -384,7 +390,7 @@ namespace ravinskij
       using val_t = std::conditional_t< IsConst, const std::pair< const Key, T >, std::pair< const Key, T > >;
       using prt_t = std::conditional_t< IsConst, const val_t*, val_t* >;
       using ref_t = std::conditional_t< IsConst, const val_t&, val_t& >;
-      using node_t = Node*;
+      using node_t = TreeNode<Key, T>*;
 
       node_t node_;
     public:
@@ -475,24 +481,24 @@ namespace ravinskij
     using const_reverse_iterator = std::reverse_iterator< const_iterator >;
     Tree():
       comparator_(),
-      fakeroot_(new Node(-1)),
+      fakeroot_(new TreeNode<Key, T>(-1)),
       size_(0)
     {}
     Tree(const Tree& other):
       comparator_(other.comparator_),
-      fakeroot_(new Node(-1)),
+      fakeroot_(new TreeNode<Key, T>(-1)),
       size_(other.size_)
     {
       size_t added = 0;
-      const Node* cur_other = other.fakeroot_;
-      Node* cur = fakeroot_;
+      const TreeNode<Key, T>* cur_other = other.fakeroot_;
+      TreeNode<Key, T>* cur = fakeroot_;
       try
       {
         while (size_ != added)
         {
           if (cur_other->right_)
           {
-            cur->right_ = new Node(*(cur_other->right_));
+            cur->right_ = new TreeNode<Key, T>(*(cur_other->right_));
             cur->right_->parent_ = cur;
             cur = cur->right_;
             cur_other = cur_other->right_;
@@ -501,7 +507,7 @@ namespace ravinskij
           }
           if (cur_other->left_)
           {
-            cur->left_ = new Node(*(cur_other->left_));
+            cur->left_ = new TreeNode<Key, T>(*(cur_other->left_));
             cur->left_->parent_ = cur;
             cur = cur->left_;
             cur_other = cur_other->left_;
@@ -528,7 +534,7 @@ namespace ravinskij
     }
     Tree(std::initializer_list< std::pair< const Key, T > > init_list):
       comparator_(),
-      fakeroot_(new Node(-1)),
+      fakeroot_(new TreeNode<Key, T>(-1)),
       size_(0)
     {
       try
@@ -564,7 +570,7 @@ namespace ravinskij
 
     iterator begin() noexcept
     {
-      Node* cur = fakeroot_;
+      TreeNode<Key, T>* cur = fakeroot_;
       for (; cur->left_; cur = cur->left_);
       return iterator(cur);
     }
@@ -574,7 +580,7 @@ namespace ravinskij
     }
     const_iterator cbegin() const noexcept
     {
-      Node* cur = fakeroot_;
+      TreeNode<Key, T>* cur = fakeroot_;
       for (; cur->left_; cur = cur->left_);
       return const_iterator(cur);
     }
@@ -616,7 +622,7 @@ namespace ravinskij
     template< typename K>
     iterator find(const K& x)
     {
-      Node* cur = fakeroot_->left_;
+      TreeNode<Key, T>* cur = fakeroot_->left_;
       while (cur)
       {
         if (cur->val_.first == x)
@@ -631,7 +637,7 @@ namespace ravinskij
     template< class K >
     const_iterator find(const K& x) const
     {
-      Node* cur = fakeroot_.left_;
+      TreeNode<Key, T>* cur = fakeroot_.left_;
       while (cur)
       {
         if (cur->val_.first == x)
@@ -651,7 +657,7 @@ namespace ravinskij
     
     const_iterator find(const Key& key) const
     {
-      Node* cur = fakeroot_->left_;
+      TreeNode<Key, T>* cur = fakeroot_->left_;
       while (cur)
       {
         if (cur->val_.first == key)
@@ -665,19 +671,19 @@ namespace ravinskij
 
     T& operator[](const Key& key)
     {
-      Node* cur = findHint(fakeroot_, key);
+      TreeNode<Key, T>* cur = findHint(fakeroot_, key);
       if (cur && cur->val_.first == key)
       {
         return cur->val_.second;
       }
-      Node* added = addNode(fakeroot_, cur, key, T{});
+      TreeNode<Key, T>* added = addNode(fakeroot_, cur, key, T{});
       ++size_;
       return added->val_.second;
     }
 
     T& at(const Key& key)
     {
-      Node* cur = findHint(fakeroot_->left_, key);
+      TreeNode<Key, T>* cur = findHint(fakeroot_->left_, key);
       if (cur && cur->val_.first == key)
       {
         return cur->val_.second;
@@ -686,7 +692,7 @@ namespace ravinskij
     }
     const T& at(const Key& key) const
     {
-      const Node* cur = findHint(fakeroot_->left_, key);
+      const TreeNode<Key, T>* cur = findHint(fakeroot_->left_, key);
       if (cur && cur->val_.first == key)
       {
         return cur->val_.second;
@@ -695,12 +701,12 @@ namespace ravinskij
     }
     std::pair< iterator, bool > insert(const val_t& val)
     {
-      Node* hint = findHint(fakeroot_, val.first);
+      TreeNode<Key, T>* hint = findHint(fakeroot_, val.first);
       if (hint && hint->val_.first == val.first)
       {
         return std::make_pair(iterator(hint), false);
       }
-      Node* added = addNode(fakeroot_, hint, val.first, val.second);
+      TreeNode<Key, T>* added = addNode(fakeroot_, hint, val.first, val.second);
       ++size_;
       return std::make_pair(iterator(added), true);
     }
@@ -722,14 +728,14 @@ namespace ravinskij
     }
     iterator erase(iterator pos)
     {
-      Node* for_del = pos.node_;
+      TreeNode<Key, T>* for_del = pos.node_;
       ++pos;
       eraseNode(for_del);
       return pos;
     }
     const_iterator erase(const_iterator pos)
     {
-      Node* for_del = pos.node_;
+      TreeNode<Key, T>* for_del = pos.node_;
       ++pos;
       eraseNode(for_del);
       return pos;
