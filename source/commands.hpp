@@ -8,6 +8,7 @@
 #include "Node.hpp"
 #include "tree.hpp"
 #include "bilist.hpp"
+
 namespace ravinskij
 {
     void printHelp();

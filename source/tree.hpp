@@ -745,32 +745,31 @@ namespace ravinskij
 
     T& operator[](const Key& key)
     {
-      Node* traverser = findHint(fakeroot_, key);
-      if (!traverser)
+      Node* cur = findHint(fakeroot_, key);
+      if (cur && cur->val_.first == key)
       {
-        Node* added = addNode(fakeroot_, traverser, key, T{});
-        ++size_;
-        return added->val_.second;
+        return cur->val_.second;
       }
-      return traverser->val_.second;
+      Node* added = addNode(fakeroot_, cur, key, T{});
+      ++size_;
+      return added->val_.second;
     }
 
     T& at(const Key& key)
     {
-      Node* traverser = findHint(fakeroot_, key);
-      if (traverser)
+      Node* cur = findHint(fakeroot_->left_, key);
+      if (cur && cur->val_.first == key)
       {
-        return traverser->val_.second;
+        return cur->val_.second;
       }
       throw std::out_of_range("No such element");
     }
-
     const T& at(const Key& key) const
     {
-      const Node* traverser = findHint(fakeroot_, key);
-      if (traverser)
+      const Node* cur = findHint(fakeroot_->left_, key);
+      if (cur && cur->val_.first == key)
       {
-        return traverser->val_.second;
+        return cur->val_.second;
       }
       throw std::out_of_range("No such element");
     }
