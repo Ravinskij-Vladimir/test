@@ -17,6 +17,7 @@ namespace ravinskij
         left_(left),
         parent_(parent)
       {}
+      ~TreeNode() = default;
       std::pair< Key, T > val_type;
       TreeNode* right_;
       TreeNode* left_;

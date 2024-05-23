@@ -11,9 +11,9 @@
 namespace ravinskij
 {
     void printHelp();
-    using traverserTable = Tree<std::string, List<ravinskij::Node*>>;
+    using traverserTable = Tree<std::string, List<nodePtr>>;
     //using traverserTable = ravinskij::Tree<std::string, ravinksij::List<ravinskij::Node>>;
-    using fileTable = ravinskij::Tree<std::string, std::string>;
+    using fileTable = Tree<std::string, std::string>;
     void addText(std::istream&, fileTable&);
     void saveText(std::istream&, fileTable&);
     void deleteText(std::istream&, fileTable&);

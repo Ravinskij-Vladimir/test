@@ -50,9 +50,8 @@ public:
             }
         }
     }
-    /// @brief release the ownership of the px pointer, destroying the object when appropriate
     template<class U>
-    void release(U* p) throw() // never throws
+    void release(U* p) noexcept
     {
         if (nullptr != pn)
         {
@@ -102,7 +101,7 @@ public:
     typedef T element_type;
 
     /// @brief Default constructor
-    shared_ptr(void) throw() : // never throws
+    shared_ptr(void) noexcept : // never throws
         shared_ptr_base(),
         px(nullptr)
     {
@@ -124,7 +123,7 @@ public:
     }
     /// @brief Copy constructor to convert from another pointer type
     template <class U>
-    shared_ptr(const shared_ptr<U>& ptr) throw() : // never throws (see comment below)
+    shared_ptr(const shared_ptr<U>& ptr) noexcept : // never throws (see comment below)
       //px(ptr.px),
         shared_ptr_base(ptr)
     {
@@ -132,7 +131,7 @@ public:
         acquire(static_cast<typename shared_ptr<T>::element_type*>(ptr.get()));   // will never throw std::bad_alloc
     }
     /// @brief Copy constructor (used by the copy-and-swap idiom)
-    shared_ptr(const shared_ptr& ptr) throw() : // never throws (see comment below)
+    shared_ptr(const shared_ptr& ptr) noexcept : // never throws (see comment below)
        //px(ptr.px),
          shared_ptr_base(ptr)
     {
@@ -140,18 +139,18 @@ public:
         acquire(ptr.px);   // will never throw std::bad_alloc
     }
     /// @brief Assignment operator using the copy-and-swap idiom (copy constructor and swap method)
-    shared_ptr& operator=(shared_ptr ptr) throw() // never throws
+    shared_ptr& operator=(shared_ptr ptr) noexcept // never throws
     {
         swap(ptr);
         return *this;
     }
     /// @brief the destructor releases its ownership
-    ~shared_ptr(void) throw() // never throws
+    ~shared_ptr(void) noexcept // never throws
     {
         release();
     }
     /// @brief this reset releases its ownership
-    void reset(void) throw() // never throws
+    void reset(void) noexcept // never throws
     {
         release();
     }
@@ -164,38 +163,38 @@ public:
     }
 
     /// @brief Swap method for the copy-and-swap idiom (copy constructor and swap method)
-    void swap(shared_ptr& lhs) throw() // never throws
+    void swap(shared_ptr& lhs) noexcept // never throws
     {
         std::swap(px, lhs.px);
         pn.swap(lhs.pn);
     }
 
     // reference counter operations :
-    operator bool() const throw() // never throws
+    operator bool() const noexcept // never throws
     {
         return (0 < pn.useCount());
     }
-    bool unique(void)  const throw() // never throws
+    bool unique(void)  const noexcept // never throws
     {
         return (1 == pn.useCount());
     }
-    size_t useCount(void)  const throw() // never throws
+    size_t useCount(void)  const noexcept // never throws
     {
         return pn.useCount();
     }
 
     // underlying pointer operations :
-    T& operator*()  const throw() // never throws
+    T& operator*()  const noexcept // never throws
     {
         SHARED_ASSERT(nullptr != px);
         return *px;
     }
-    T* operator->() const throw() // never throws
+    T* operator->() const noexcept // never throws
     {
         SHARED_ASSERT(nullptr != px);
         return px;
     }
-    T* get(void)  const throw() // never throws
+    T* get(void)  const noexcept // never throws
     {
         // no assert, can return nullptr
         return px;
@@ -210,7 +209,7 @@ private:
     }
 
     /// @brief release the ownership of the px pointer, destroying the object when appropriate
-    void release(void) throw() // never throws
+    void release(void) noexcept // never throws
     {
         pn.release(px);
         px = nullptr;
@@ -222,27 +221,27 @@ private:
 
 
 // comparaison operators
-template<class T, class U> bool operator==(const shared_ptr<T>& l, const shared_ptr<U>& r) throw() // never throws
+template<class T, class U> bool operator==(const shared_ptr<T>& l, const shared_ptr<U>& r) noexcept // never throws
 {
     return (l.get() == r.get());
 }
-template<class T, class U> bool operator!=(const shared_ptr<T>& l, const shared_ptr<U>& r) throw() // never throws
+template<class T, class U> bool operator!=(const shared_ptr<T>& l, const shared_ptr<U>& r) noexcept // never throws
 {
     return (l.get() != r.get());
 }
-template<class T, class U> bool operator<=(const shared_ptr<T>& l, const shared_ptr<U>& r) throw() // never throws
+template<class T, class U> bool operator<=(const shared_ptr<T>& l, const shared_ptr<U>& r) noexcept // never throws
 {
     return (l.get() <= r.get());
 }
-template<class T, class U> bool operator<(const shared_ptr<T>& l, const shared_ptr<U>& r) throw() // never throws
+template<class T, class U> bool operator<(const shared_ptr<T>& l, const shared_ptr<U>& r) noexcept // never throws
 {
     return (l.get() < r.get());
 }
-template<class T, class U> bool operator>=(const shared_ptr<T>& l, const shared_ptr<U>& r) throw() // never throws
+template<class T, class U> bool operator>=(const shared_ptr<T>& l, const shared_ptr<U>& r) noexcept // never throws
 {
     return (l.get() >= r.get());
 }
-template<class T, class U> bool operator>(const shared_ptr<T>& l, const shared_ptr<U>& r) throw() // never throws
+template<class T, class U> bool operator>(const shared_ptr<T>& l, const shared_ptr<U>& r) noexcept // never throws
 {
     return (l.get() > r.get());
 }

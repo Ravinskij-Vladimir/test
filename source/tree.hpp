@@ -1,714 +1,873 @@
 #ifndef TREE_HPP
 #define TREE_HPP
-#include <cstddef>
-#include <functional>
-#include "treeiterator.hpp"
+#include <algorithm>
+#include <initializer_list>
+#include <memory>
+#include <stdexcept>
 
 namespace ravinskij
 {
-  template< class Key, class T, class Compare = std::less< Key > >
+  template< typename Key, typename T, typename Compare = std::less< Key > >
   class Tree
   {
+    using val_t = std::pair< const Key, T >;
+    struct Node;
+    Compare comparator_;
+    Node* fakeroot_;
+    size_t size_;
+    struct Node
+    {
+      val_t val_;
+      int height_;
+      Node* left_;
+      Node* right_;
+      Node* parent_;
+
+      Node():
+        val_(),
+        height_(0),
+        left_(nullptr),
+        right_(nullptr),
+        parent_(nullptr)
+      {}
+      template< class... Args  >
+      explicit Node(int height, Args&&... args):
+        val_(std::forward< Args >(args)...),
+        height_(height),
+        left_(nullptr),
+        right_(nullptr),
+        parent_(nullptr)
+      {}
+      Node(const Node& other):
+        val_(other.val_),
+        height_(0),
+        left_(nullptr),
+        right_(nullptr),
+        parent_(nullptr)
+      {}
+      Node(Node&& other):
+        val_(std::move(other.val_)),
+        height_(height_),
+        left_(other.left_),
+        right_(other.right_),
+        parent_(other.parent_)
+      {
+        other.height_ = 0;
+        other.left_ = nullptr;
+        other.right_ = nullptr;
+        other.parent_ = nullptr;
+      }
+      static int depth(Node* node)
+      {
+        return node ? node->height_ + 1 : 0;
+      }
+      void clear()
+      {
+        height_ = 0;
+        left_ = nullptr;
+        right_ = nullptr;
+        parent_ = nullptr;
+      }
+      bool updateHeight()
+      {
+        int old_height = height_;
+        height_ = std::max(depth(left_), depth(right_));
+        return old_height != height_;
+      }
+      void rotate()
+      {
+        Node* root = this;
+        Node* parent = root->parent_;
+        bool left = (root == parent->left_);
+        if (depth(left_) < depth(right_))
+        {
+          root = (depth(right_->left_) <= depth(right_->right_)) ? root->rotateLeft() : root->rotateLeftRight();
+        }
+        else
+        {
+          root = (depth(left_->right_) <= depth(left_->left_)) ? root->rotateRight() : root->rotateRightLeft();
+        }
+        root->parent_ = parent;
+        (left ? parent->left_ : parent->right_) = root;
+        return;
+      }
+    private:
+      Node* rotateLeft()
+      {
+        Node* root = this;
+        Node* new_root = root->right_;
+        root->right_ = new_root->left_;
+        if (new_root->left_)
+        {
+          new_root->left_->parent_ = root;
+        }
+        new_root->left_ = root;
+        root->parent_ = new_root;
+        root->updateHeight();
+        new_root->updateHeight();
+        return new_root;
+      }
+      Node* rotateRight()
+      {
+        Node* root = this;
+        Node* new_root = root->left_;
+        root->left_ = new_root->right_;
+        if (new_root->right_)
+        {
+          new_root->right_->parent_ = root;
+        }
+        new_root->right_ = root;
+        root->parent_ = new_root;
+        root->updateHeight();
+        new_root->updateHeight();
+        return new_root;
+      }
+      Node* rotateLeftRight()
+      {
+        Node* root = this;
+        Node* new_root = root->right_->left_;
+        root->right_->left_ = new_root->right_;
+        if (new_root->right_)
+        {
+          new_root->right_->parent_ = root->right_;
+        }
+        new_root->right_ = root->right_;
+        root->right_->parent_ = new_root;
+        root->right_ = new_root->left_;
+        if (new_root->left_)
+        {
+          new_root->left_->parent_ = root;
+        }
+        new_root->left_ = root;
+        root->parent_ = new_root;
+        root->updateHeight();
+        new_root->right_->updateHeight();
+        new_root->updateHeight();
+        return new_root;
+      }
+      Node* rotateRightLeft()
+      {
+        Node* root = this;
+        Node* new_root = root->left_->right_;
+        root->left_->right_ = new_root->left_;
+        if (new_root->left_)
+        {
+          new_root->left_->parent_ = root->left_;
+        }
+        new_root->left_ = root->left_;
+        root->left_->parent_ = new_root;
+        root->left_ = new_root->right_;
+        if (new_root->right_)
+        {
+          new_root->right_->parent_ = root;
+        }
+        new_root->right_ = root;
+        root->parent_ = new_root;
+        root->updateHeight();
+        new_root->left_->updateHeight();
+        new_root->updateHeight();
+        return new_root;
+      }
+    };
+    Node* findHint(Node* root, const Key& key)
+    {
+      Node* cur = (root->height_ < 0) ? root->left_ : root;
+      while (cur)
+      {
+        if (cur->val_.first == key)
+        {
+          return cur;
+        }
+        if (comparator_(key, cur->val_.first))
+        {
+          if (!cur->left_)
+          {
+            return cur;
+          }
+          cur = cur->left_;
+        }
+        else
+        {
+          if (!cur->right_)
+          {
+            return cur;
+          }
+          cur = cur->right_;
+        }
+      }
+      return nullptr;
+    }
+
+    const Node* findHint(Node* root, const Key& key) const
+    {
+      Node* cur = (root->height_ < 0) ? root->left_ : root;
+      while (cur)
+      {
+        if (cur->val_.first == key)
+        {
+          return cur;
+        }
+        if (comparator_(key, cur->val_.first))
+        {
+          if (!cur->left_)
+          {
+            return cur;
+          }
+          cur = cur->left_;
+        }
+        else
+        {
+          if (!cur->right_)
+          {
+            return cur;
+          }
+          cur = cur->right_;
+        }
+      }
+      return nullptr;
+    }
+    void rebalanceTree(Node* start)
+    {
+      using std::abs;
+      using std::max;
+      while (start && start->height_ != -1)
+      {
+        int depth_diff = Node::depth(start->left_) - Node::depth(start->right_);
+        if (start->height_ == max(Node::depth(start->left_), Node::depth(start->right_)) && abs(depth_diff) < 2)
+        {
+          return;
+        }
+        Node* parent = start->parent_;
+        if (abs(depth_diff) > 1)
+        {
+          start->rotate();
+        }
+        else
+        {
+          start->height_ = max(Node::depth(start->left_), Node::depth(start->right_));
+        }
+        start = parent;
+      }
+      return;
+    }
+    void freeNodes(Node* root) noexcept
+    {
+      if (!root)
+      {
+        return;
+      }
+      Node* cur = root;
+      while (root->right_ || root->left_)
+      {
+        if (cur->right_)
+        {
+          cur = cur->right_;
+          continue;
+        }
+        if (cur->left_)
+        {
+          cur = cur->left_;
+          continue;
+        }
+        cur = cur->parent_;
+        if (cur->left_ && !cur->left_->left_ && !cur->left_->right_)
+        {
+          delete cur->left_;
+          cur->left_ = nullptr;
+        }
+        if (cur->right_ && !cur->right_->left_ && !cur->right_->right_)
+        {
+          delete cur->right_;
+          cur->right_ = nullptr;
+        }
+      }
+      delete root;
+    }
+    Node* addNode(Node* root, Node* hint, const Key& key, const T& new_val)
+    {
+      if (!hint)
+      {
+        hint = findHint(root, key);
+      }
+      if (!hint)
+      {
+        root->left_ = new Node(0, std::forward< val_t >(std::make_pair(key, new_val)));
+        root->left_->parent_ = root;
+        return root->left_;
+      }
+      if (hint->val_.first == key)
+      {
+        hint->val_.second = new_val;
+        return hint;
+      }
+      Node* new_node = new Node(0, std::forward< val_t >(std::make_pair(key, new_val)));
+      (comparator_(hint->val_.first, key) ? hint->right_ : hint->left_) = new_node;
+      new_node->parent_ = hint;
+      rebalanceTree(hint);
+      return new_node;
+    }
+    void eraseNode(Node* for_del)
+    {
+      Node* parent = for_del->parent_;
+      if (!for_del->left_ || !for_del->right_)
+      {
+        Node* child = (for_del->left_ ? for_del->left_ : for_del->right_);
+        (for_del == parent->left_ ? parent->left_ : parent->right_) = child;
+        if (child)
+        {
+          child->parent_ = parent;
+        }
+        rebalanceTree(parent);
+      }
+      else
+      {
+        Node* prev = for_del->left_;
+        for (; prev->right_; prev = prev->right_);
+        Node* prev_parent = prev->parent_;
+        prev->right_ = for_del->right_;
+        if (for_del->right_)
+        {
+          for_del->right_->parent_ = prev;
+        }
+        ((for_del == parent->left_) ? parent->left_ : parent->right_) = prev;
+        prev->parent_ = parent;
+        if (prev_parent != for_del)
+        {
+          prev_parent->right_ = prev->left_;
+          prev->left_->parent_ = prev_parent;
+          prev->left_ = for_del->left_;
+        }
+        rebalanceTree((prev_parent != for_del) ? prev_parent : prev);
+      }
+      delete for_del;
+    }
+    template< typename InputIt >
+    Node* createTree(Node* fakeroot, InputIt begin, InputIt end, size_t& nmb_of_added)
+    {
+      nmb_of_added = 0;
+      if (begin == end)
+      {
+        return nullptr;
+      }
+      bool fake_given = fakeroot;
+      if (!fakeroot)
+      {
+        fakeroot_ = new Node(-1);
+      }
+      fakeroot->left_ = new Node(0, std::forward(*begin));
+      fakeroot->left_->parent_ = fakeroot;
+      ++begin;
+      ++nmb_of_added;
+      try
+      {
+        while (begin != end)
+        {
+          addNode(fakeroot, nullptr, (*begin).first, (*begin).second);
+          ++begin;
+          ++nmb_of_added;
+        }
+      }
+      catch (...)
+      {
+        freeNodes(fake_given ? fakeroot->left_ : fakeroot);
+        throw;
+      }
+      return fakeroot;
+    }
+
+    template< bool IsConst >
+    class BaseIterator
+    {
+      template< bool U > friend class BaseIterator;
+      template< typename T1, typename T2, class T3 > friend class Tree;
+      using val_t = std::conditional_t< IsConst, const std::pair< const Key, T >, std::pair< const Key, T > >;
+      using prt_t = std::conditional_t< IsConst, const val_t*, val_t* >;
+      using ref_t = std::conditional_t< IsConst, const val_t&, val_t& >;
+      using node_t = Node*;
+
+      node_t node_;
+    public:
+      using iterator_category = std::bidirectional_iterator_tag;
+      using value_type = val_t;
+      using difference_type = std::ptrdiff_t;
+      using pointer = prt_t;
+      using reference = ref_t;
+
+      BaseIterator() noexcept:
+        node_(nullptr)
+      {}
+      BaseIterator(const BaseIterator& other) noexcept:
+        node_(other.node_)
+      {}
+      explicit BaseIterator(node_t node) noexcept:
+        node_(node)
+      {}
+      template< bool cond = IsConst, std::enable_if_t< cond, bool > = true >
+      BaseIterator(const BaseIterator< !cond >& other) noexcept:
+        node_(other.node_)
+      {}
+      BaseIterator& operator=(const BaseIterator& other) noexcept
+      {
+        node_ = other.node_;
+      }
+      BaseIterator& operator++()
+      {
+        if (node_->right_)
+        {
+          node_ = node_->right_;
+          for (; node_->left_; node_ = node_->left_);
+        }
+        else
+        {
+          for (; node_ == node_->parent_->right_; node_ = node_->parent_);
+          node_ = node_->parent_;
+        }
+        return *this;
+      }
+      BaseIterator operator++(int)
+      {
+        BaseIterator copy = *this;
+        ++(*this);
+        return copy;
+      }
+      BaseIterator& operator--()
+      {
+        if (node_->left_)
+        {
+          node_ = node_->left_;
+          for (; node_->right_; node_ = node_->right_);
+        }
+        else
+        {
+          for (; node_ == node_->parent_->left_; node_ = node_->parent_);
+          node_ = node_->parent_;
+        }
+        return *this;
+      }
+      BaseIterator operator--(int)
+      {
+        BaseIterator copy = *this;
+        --(*this);
+        return copy;
+      }
+      ref_t operator*() const
+      {
+        return node_->val_;
+      }
+      prt_t operator->() const
+      {
+        return std::addressof(node_->val_);
+      }
+      bool operator!=(const BaseIterator& other) const noexcept
+      {
+        return node_ != other.node_;
+      }
+      bool operator==(const BaseIterator& other) const noexcept
+      {
+        return node_ == other.node_;
+      }
+    };
   public:
-    using val_type = std::pair< const Key, T >;
+    using iterator = BaseIterator< false >;
+    using const_iterator = BaseIterator< true >;
+    using reverse_iterator = std::reverse_iterator< iterator >;
+    using const_reverse_iterator = std::reverse_iterator< const_iterator >;
     Tree():
-      root_(nullptr),
-      cmp_(Compare()),
-      size_(0),
-      before_min_(Key(), nullptr, nullptr, std::addressof(end_node_), T()),
-      end_node_(Key(), nullptr, nullptr, std::addressof(before_min_), T())
+      comparator_(),
+      fakeroot_(new Node(-1)),
+      size_(0)
     {}
-    template< class InputIterator >
-    Tree(InputIterator first, InputIterator second):
-      Tree()
+    Tree(const Tree& other):
+      comparator_(other.comparator_),
+      fakeroot_(new Node(-1)),
+      size_(other.size_)
     {
+      size_t added = 0;
+      const Node* cur_other = other.fakeroot_;
+      Node* cur = fakeroot_;
       try
       {
-        while (first != second)
+        while (size_ != added)
         {
-          insert(*first++);
+          if (cur_other->right_)
+          {
+            cur->right_ = new Node(*(cur_other->right_));
+            cur->right_->parent_ = cur;
+            cur = cur->right_;
+            cur_other = cur_other->right_;
+            ++added;
+            continue;
+          }
+          if (cur_other->left_)
+          {
+            cur->left_ = new Node(*(cur_other->left_));
+            cur->left_->parent_ = cur;
+            cur = cur->left_;
+            cur_other = cur_other->left_;
+            ++added;
+            continue;
+          }
+          cur = cur->parent_;
+          cur_other = cur_other->parent_;
         }
       }
       catch (...)
       {
-        clear();
+        freeNodes(fakeroot_);
+        throw;
       }
     }
-    Tree(std::initializer_list< val_type > il):
-      Tree(il.begin(), il.end())
-    {}
-    Tree(const Tree& rhs):
-      Tree()
+    Tree(Tree&& other) noexcept:
+      comparator_(std::move(other.comparator_)),
+      fakeroot_(other.fakeroot_),
+      size_(other.size_)
+    {
+      other.fakeroot_ = nullptr;
+      other.size_ = 0;
+    }
+    Tree(std::initializer_list< std::pair< const Key, T > > init_list):
+      comparator_(),
+      fakeroot_(new Node(-1)),
+      size_(0)
     {
       try
       {
-        ConstTreeIterator< Key, T, Compare > it_right(rhs.root_);
-        ConstTreeIterator< Key, T, Compare > it_left(rhs.root_);
-        while (rhs.root_ && (it_right != rhs.cend() || it_left != --rhs.cbegin()))
-        {
-          if (it_right != rhs.cend())
-          {
-            insert_impl(std::pair< Key, T >(*it_right++));
-          }
-          if (it_left != --rhs.cbegin())
-          {
-            insert_impl(std::pair< Key, T >(*it_left--));
-          }
-        }
+        createTree(fakeroot_, init_list.begin(), init_list.end(), size_);
       }
       catch (...)
       {
-        clear();
+        freeNodes(fakeroot_);
       }
     }
-    Tree(Tree&& rhs):
-      root_(rhs.root_),
-      cmp_(rhs.cmp_),
-      size_(rhs.size_),
-      before_min_(Key(), nullptr, nullptr, rhs.before_min_.parent_, T()),
-      end_node_(Key(), nullptr, nullptr, rhs.end_node_.parent_, T())
+    template< typename InputIt >
+    Tree(InputIt begin, InputIt end):
+      comparator_(),
+      fakeroot_(new Node(-1)),
+      size_(0)
     {
-      rhs.root_ = nullptr;
-      rhs.size_ = 0;
-      end_node_.parent_->right_ = std::addressof(end_node_);
-      before_min_.parent_->left_ = std::addressof(before_min_);
-      rhs.before_min_.parent_ = std::addressof(rhs.end_node_);
-      rhs.end_node_.parent_ = std::addressof(rhs.before_min_);
+      try
+      {
+        createTree(fakeroot_, begin, end, size_);
+      }
+      catch (...)
+      {
+        freeNodes(fakeroot_);
+      }
     }
     ~Tree()
     {
+      freeNodes(fakeroot_);
+    }
+    Tree& operator=(const Tree& other)
+    {
+      Tree new_map(other);
       clear();
-    }
-    Tree< Key, T, Compare >& operator=(const Tree& rhs)
-    {
-      if (std::addressof(rhs) != this)
-      {
-        Tree< Key, T, Compare > temp(rhs);
-        swap(temp);
-      }
+      this->swap(new_map);
       return *this;
     }
-    Tree< Key, T, Compare >& operator=(Tree&& rhs)
+    Tree& operator=(Tree&& other)
     {
-      if (this != std::addressof(rhs))
+      if (this == std::addressof(other))
       {
-        clear();
-        swap(rhs);
+        return *this;
       }
+      this->swap(other);
+      other.clear();
       return *this;
+    }
+
+    iterator begin() noexcept
+    {
+      Node* cur = fakeroot_;
+      for (; cur->left_; cur = cur->left_);
+      return iterator(cur);
+    }
+    const_iterator begin() const noexcept
+    {
+      return cbegin();
+    }
+    const_iterator cbegin() const noexcept
+    {
+      Node* cur = fakeroot_;
+      for (; cur->left_; cur = cur->left_);
+      return const_iterator(cur);
+    }
+    reverse_iterator rbegin() noexcept
+    {
+      return std::make_reverse_iterator(end());
+    }
+    const_reverse_iterator rbegin() const noexcept
+    {
+      return std::make_reverse_iterator(cend());
+    }
+    const_reverse_iterator crbegin() const noexcept
+    {
+      return std::make_reverse_iterator(cend());
+    }
+
+    iterator end() noexcept
+    {
+      return iterator(fakeroot_);
+    }
+    const_iterator end() const noexcept
+    {
+      return const_iterator(fakeroot_);
+    }
+    const_iterator cend() const noexcept
+    {
+      return const_iterator(fakeroot_);
+    }
+    reverse_iterator rend() noexcept
+    {
+      return std::make_reverse_iterator(begin());
+    }
+    const_reverse_iterator rend() const noexcept
+    {
+      return std::make_reverse_iterator(cbegin());
+    }
+    const_reverse_iterator crend() const noexcept
+    {
+      return std::make_reverse_iterator(cbegin());
+    }
+
+    bool empty() const noexcept
+    {
+      return !size_;
     }
     size_t size() const noexcept
     {
       return size_;
     }
-    bool empty() const noexcept
+    void clear() noexcept
     {
-      return size_ == 0;
+      freeNodes(fakeroot_->left_);
+      fakeroot_->left_ = nullptr;
+      size_ = 0;
     }
-    void swap(Tree< Key, T, Compare >& mp)
+    void swap(Tree& other)
     {
-      std::swap(root_, mp.root_);
-      std::swap(cmp_, mp.cmp_);
-      std::swap(size_, mp.size_);
-      detail::TreeNode< Key, T > temp1 = end_node_;
-      detail::TreeNode< Key, T > temp2 = before_min_;
-      end_node_.parent_ = mp.end_node_.parent_;
-      end_node_.parent_->right_ = std::addressof(end_node_);
-      before_min_.parent_ = mp.before_min_.parent_;
-      before_min_.parent_->left_ = std::addressof(before_min_);
-      mp.before_min_.parent_ = temp2.parent_;
-      mp.end_node_.parent_ = temp1.parent_;
-      if (mp.size_ != 0)
+      std::swap(comparator_, other.comparator_);
+      std::swap(fakeroot_, other.fakeroot_);
+      std::swap(size_, other.size_);
+    }
+
+    template< typename K>
+    iterator find(const K& x)
+    {
+      Node* cur = fakeroot_->left_;
+      while (cur)
       {
-        mp.before_min_.parent_->left_ = std::addressof(mp.before_min_);
-        mp.end_node_.parent_->right_ = std::addressof(mp.end_node_);
-      }
-    }
-    std::pair< TreeIterator< Key, T, Compare >, bool > insert(const val_type& val)
-    {
-      auto res = insert_impl(val);
-      splay(res.first.node_);
-      return res;
-    }
-    TreeIterator< Key, T, Compare > insert(ConstTreeIterator< Key, T, Compare > pos, const val_type& val)
-    {
-      if (cmpLeftNode(pos.node_, val.first) && cmpNodeRight(pos.node_, val.first) && cmpNodeParent(pos.node_, val.first))
-      {
-        detail::TreeNode< Key, T >* node = nullptr;
-        node = new detail::TreeNode< Key, T >(val.first, pos.node_, pos.node_->left_, pos.node_->parent_, val.second);
-        if (pos.node_->left_)
+        if (cur->val_.first == x)
         {
-          pos.node_->left_->parent_ = node;
-          if (pos.node_->left_ == std::addressof(before_min_))
-          {
-            node->right_->left_ = nullptr;
-          }
+          return iterator(cur);
         }
-        if (isLeftChild(pos.node_))
+        cur = (comparator_(cur->val_.first, x)) ? cur->right_ : cur->left_;
+      }
+      return end();
+    }
+    template< class K >
+    const_iterator find(const K& x) const
+    {
+      Node* cur = fakeroot_.left_;
+      while (cur)
+      {
+        if (cur->val_.first == x)
         {
-          pos.node_->parent_->left_ = node;
+          return const_iterator(cur);
         }
-        else if (isRightChild(pos.node_))
+        cur = (comparator_(cur->val_.first, x)) ? cur->left_ : cur->right_;
+      }
+      return cend();
+    }
+    template< class K >
+    size_t count(const K& x) const
+    {
+      return (find(x) != end());
+    }
+    iterator lower_bound(const Key& key)
+    {
+      Node* cur = findHint(fakeroot_->left_, key);
+      if (comparator_(cur->val_.first, key))
+      {
+        return ++iterator(cur);
+      }
+      return iterator(cur);
+    }
+    const_iterator lower_bound(const Key& key) const
+    {
+      Node* cur = findHint(fakeroot_->left_, key);
+      if (comparator_(cur->val_.first, key))
+      {
+        return ++const_iterator(cur);
+      }
+      return const_iterator(cur);
+    }
+    iterator upper_bound(const Key& key)
+    {
+      iterator lb = lower_bound(key);
+      if (lb != end() && !comparator_((*lb).first, key))
+      {
+        return ++lb;
+      }
+      return lb;
+    }
+    const_iterator upper_bound(const Key& key) const
+    {
+      const_iterator lb = lower_bound(key);
+      if (lb != cend() && !comparator_((*lb).first, key))
+      {
+        return ++lb;
+      }
+      return lb;
+    }
+    std::pair< iterator, iterator > equal_range(const Key& key)
+    {
+      return std::make_pair(lower_bound(key), upper_bound(key));
+    }
+    std::pair< const_iterator, const_iterator > equal_range(const Key& key) const
+    {
+      return std::make_pair(lower_bound(key), upper_bound(key));
+    }
+    const_iterator find(const Key& key) const
+    {
+      Node* cur = fakeroot_->left_;
+      while (cur)
+      {
+        if (cur->val_.first == key)
         {
-          pos.node_->parent_->right_ = node;
+          return const_iterator(cur);
         }
-        pos.node_->parent_ = node;
-        pos.node_->left_ = nullptr;
-        if (pos.node_ == root_ || !root_)
-        {
-          if (!root_)
-          {
-            node->parent_ = nullptr;
-            node->left_ = std::addressof(before_min_);
-            before_min_.parent_ = node;
-          }
-          root_ = node;
-        }
-        ++size_;
-        splay(node);
-        return TreeIterator< Key, T, Compare >(node);
+        cur = (comparator_(cur->val_.first, key)) ? cur->right_ : cur->left_;
       }
-      return insert(val).first;
+      return cend();
     }
-    template< class Iterator >
-    void insert(Iterator start, Iterator finish)
-    {
-      while (start != finish)
-      {
-        insert(*start++);
-      }
-    }
-    TreeIterator< Key, T, Compare > begin() noexcept
-    {
-      return TreeIterator< Key, T, Compare >(before_min_.parent_);
-    }
-    TreeIterator< Key, T, Compare > end() noexcept
-    {
-      return TreeIterator< Key, T, Compare >(std::addressof(end_node_));
-    }
-    ConstTreeIterator< Key, T, Compare > cbegin() const noexcept
-    {
-      return ConstTreeIterator< Key, T, Compare >(before_min_.parent_);
-    }
-    ConstTreeIterator< Key, T, Compare > cend() const noexcept
-    {
-      return ConstTreeIterator< Key, T, Compare >(const_cast< detail::TreeNode< Key, T >* >(std::addressof(end_node_)));
-    }
-    std::reverse_iterator< TreeIterator< Key, T, Compare > > rbegin() noexcept
-    {
-      return std::reverse_iterator< TreeIterator< Key, T, Compare > >(end());
-    }
-    std::reverse_iterator< TreeIterator< Key, T, Compare > > rend() noexcept
-    {
-      return std::reverse_iterator< TreeIterator< Key, T, Compare > >(begin());
-    }
-    std::reverse_iterator< ConstTreeIterator< Key, T, Compare > > crbegin() const noexcept
-    {
-      return std::reverse_iterator< ConstTreeIterator< Key, T, Compare > >(cend());
-    }
-    std::reverse_iterator< ConstTreeIterator< Key, T, Compare > > crend() const noexcept
-    {
-      return std::reverse_iterator< ConstTreeIterator< Key, T, Compare > >(cbegin());
-    }
-    TreeIterator< Key, T, Compare > find(const Key& key)
-    {
-      auto it = find_impl(key);
-      if (it != end())
-      {
-        splay(it.node_);
-      }
-      return it;
-    }
-    ConstTreeIterator< Key, T, Compare > find(const Key& key) const
-    {
-      return find_impl(key);
-    }
-    TreeIterator< Key, T, Compare > upper_bound(const Key& key)
-    {
-      TreeIterator< Key, T, Compare > it = lower_bound_impl(key);
-      if (!cmp(it.node_->val_type.first, key) && !cmp(key, it.node_->val_type.first))
-      {
-        if (it != end())
-        {
-          splay(it.node_);
-        }
-        return it;
-      }
-      ++it;
-      if (it != end())
-      {
-        splay(it.node_);
-      }
-      return it;
-    }
-    ConstTreeIterator< Key, T, Compare > upper_bound(const Key& key) const
-    {
-      ConstTreeIterator< Key, T, Compare > it = lower_bound(key);
-      if (equal_key(it.node_->val_type.first, key))
-      {
-        return it;
-      }
-      return ++it;
-    }
-    TreeIterator< Key, T, Compare > lower_bound(const Key& key)
-    {
-      auto it = static_cast< const Tree< Key, T, Compare >& >(*this).lower_bound(key);
-      if (it != end())
-      {
-        splay(it.node_);
-      }
-      return TreeIterator< Key, T, Compare >(const_cast< detail::TreeNode< Key, T >* >(it.node_));
-    }
-    ConstTreeIterator< Key, T, Compare > lower_bound(const Key& key) const
-    {
-      return lower_bound_impl(key);
-    }
-    // T& operator[](const Key& key)
-    // {
-    //   return (((this->insert(std::make_pair(key, T()))).first)->second);
-    // }
-    T& operator[](const Key& key)
-    {
-      auto traverser = find(key);
-      if (find(key) == end())
-      {
-        return insert(std::make_pair(key, T())).first->second;
-      }
-      return traverser->second;
-    }
+
     T& at(const Key& key)
     {
-      if (find(key) == end())
+      Node* cur = findHint(fakeroot_->left_, key);
+      if (cur && cur->val_.first == key)
       {
-        throw std::out_of_range("No data with this key");
+        return cur->val_.second;
       }
-      return operator[](key);
+      throw std::out_of_range("No such element");
     }
     const T& at(const Key& key) const
     {
-      if (find(key) == cend())
+      Node* cur = findHint(fakeroot_->left_, key);
+      if (cur && cur->val_.first == key)
       {
-        throw std::out_of_range("No data with this key");
+        return cur->val_.second;
       }
-      return find(key)->second;
+      throw std::out_of_range("No such element");
     }
-    TreeIterator< Key, T, Compare > erase(TreeIterator< Key, T, Compare > pos)
+    T& operator[](const Key& key)
     {
-      TreeIterator< Key, T, Compare > delete_node = find_impl(pos.node_->val_type.first);
-      if (delete_node == end())
+      Node* cur = findHint(fakeroot_, key);
+      if (cur && cur->val_.first == key)
       {
-        return delete_node;
+        return cur->val_.second;
       }
-      TreeIterator< Key, T, Compare > result = delete_node;
-      ++result;
-      detail::TreeNode< Key, T >* node = delete_node.node_->right_;
-      if (!node || delete_node.node_->right_ == std::addressof(end_node_))
-      {
-        if ((size_ == 1) || (delete_node.node_->parent_ && !delete_node.node_->parent_->left_))
-        {
-          if (size_ != 1 && delete_node.node_->right_)
-          {
-            delete_node.node_->parent_->right_ = std::addressof(end_node_);
-          }
-          delete delete_node.node_;
-          --size_;
-          return result;
-        }
-        node = delete_node.node_->left_;
-        while (node && node->right_)
-        {
-          node = node->right_;
-        }
-        if (node)
-        {
-          if (node != delete_node.node_->left_)
-          {
-            node->left_ = delete_node.node_->left_;
-            delete_node.node_->left_->parent_ = node;
-          }
-          if (isLeftChild(node))
-          {
-            node->parent_->left_ = nullptr;
-          }
-          else
-          {
-            node->parent_->right_ = nullptr;
-          }
-          node->parent_ = delete_node.node_->parent_;
-          if (delete_node.node_->right_)
-          {
-            end_node_.parent_ = node;
-            node->right_ = std::addressof(end_node_);
-          }
-        }
-        if (isLeftChild(delete_node.node_))
-        {
-          delete_node.node_->parent_->left_ = node;
-        }
-        else if (isRightChild(delete_node.node_))
-        {
-          delete_node.node_->parent_->right_ = node;
-        }
-        if (delete_node.node_ == root_)
-        {
-          root_ = node;
-        }
-        delete delete_node.node_;
-        --size_;
-        return result;
-      }
-      while (node && node->left_)
-      {
-        node = node->left_;
-      }
-      if (node)
-      {
-        node->left_ = delete_node.node_->left_;
-        if (isLeftChild(node))
-        {
-          node->parent_->left_ = node->right_;
-        }
-        else if (isRightChild(node))
-        {
-          node->parent_->right_ = node->right_;
-        }
-        if (node->right_)
-        {
-          node->right_->parent_ = node->parent_;
-        }
-        if (!(delete_node.node_->right_ == node))
-        {
-          node->right_ = delete_node.node_->right_;
-        }
-        node->parent_ = delete_node.node_->parent_;
-      }
-      if (delete_node.node_->left_ && delete_node.node_->left_ != node)
-      {
-        delete_node.node_->left_->parent_ = node;
-      }
-      if (delete_node.node_->right_ && delete_node.node_->right_ != node)
-      {
-        delete_node.node_->right_->parent_ = node;
-      }
-      if (isLeftChild(delete_node.node_))
-      {
-        delete_node.node_->parent_->left_ = node;
-      }
-      else if (isRightChild(delete_node.node_))
-      {
-        delete_node.node_->parent_->right_ = node;
-      }
-      if (delete_node.node_ == root_)
-      {
-        root_ = node;
-      }
-      delete delete_node.node_;
-      --size_;
-      return result;
+      Node* added = addNode(fakeroot_, cur, key, T{});
+      ++size_;
+      return added->val_.second;
     }
-    TreeIterator< Key, T, Compare > erase(TreeIterator< Key, T, Compare > start, TreeIterator< Key, T, Compare > finish)
+
+    template< class... Args >
+    std::pair< iterator, bool > emplace(Args&&... args)
     {
-      while (start != finish)
+      val_t new_val(std::forward< Args >(args)...);
+      Node* hint = findHint(fakeroot_, new_val.first);
+      if (hint && hint->val_.first == new_val.first)
       {
-        erase(start++);
+        return std::make_pair(iterator(hint), false);
       }
-      return finish;
+      Node* added = addNode(fakeroot_, hint, new_val.first, new_val.second);
+      ++size_;
+      return std::make_pair(iterator(added), true);
     }
-    void clear()
+    template< class... Args >
+    iterator emplace_hint(const_iterator  pos, Args&&... args)
     {
-      while (!empty())
+      val_t new_val(std::forward< Args >(args)...);
+      if (empty() || pos == end())
       {
-        erase(TreeIterator< Key, T, Compare >(root_));
+        return iterator(addNode(fakeroot_, nullptr, new_val.first, new_val.second));
       }
+      if (comparator_(new_val, (*pos).first)&&(pos == begin()|| comparator_((*std::prev(pos)).first, new_val)))
+      {
+        return iterator(addNode(fakeroot_, pos.node_, new_val.first, new_val.second));
+      }
+      Node* hint = findHint(fakeroot_, new_val.first);
+      if (hint->val_.first == new_val.first)
+      {
+        return iterator(hint);
+      }
+      else
+      {
+        return iterator(addNode(fakeroot_, hint, new_val.first, new_val.second));
+      }
+    }
+    std::pair< iterator, bool > insert(const val_t& val)
+    {
+      Node* hint = findHint(fakeroot_, val.first);
+      if (hint && hint->val_.first == val.first)
+      {
+        return std::make_pair(iterator(hint), false);
+      }
+      Node* added = addNode(fakeroot_, hint, val.first, val.second);
+      ++size_;
+      return std::make_pair(iterator(added), true);
+    }
+    iterator insert(const_iterator pos, const val_t& val)
+    {
+      return emplace_hint(pos, val);
+    }
+    template< class InputIt >
+    void insert(InputIt first, InputIt last)
+    {
+      for (; first != last; ++first)
+      {
+        addNode(fakeroot_, nullptr, first->val_.first, first->val_.second);
+      }
+    }
+    void insert(std::initializer_list<val_t> init_list)
+    {
+      insert(init_list.begin(), init_list.end());
+    }
+
+    iterator erase(iterator pos)
+    {
+      Node* for_del = pos.node_;
+      ++pos;
+      eraseNode(for_del);
+      return pos;
+    }
+    const_iterator erase(const_iterator pos)
+    {
+      Node* for_del = pos.node_;
+      ++pos;
+      eraseNode(for_del);
+      return pos;
     }
     size_t erase(const Key& key)
     {
-      size_t count = 0;
-      while (erase(find(key)) != end())
+      iterator pos = find(key);
+      if (pos == end())
       {
-        ++count;
+        return 0;
       }
-      return count;
+      erase(pos);
+      return 1;
     }
-    std::pair< ConstTreeIterator< Key, T, Compare >, ConstTreeIterator< Key, T, Compare > > equal_range(const Key& key) const
+    iterator erase(iterator first, iterator last)
     {
-      ConstTreeIterator< Key, T, Compare > it = find_impl(key);
-      if (it == cend())
-      {
-        return std::make_pair< ConstTreeIterator< Key, T, Compare >, ConstTreeIterator< Key, T, Compare > >(cend(), cend());
-      }
-      ConstTreeIterator< Key, T, Compare > it2 = it;
-      ConstTreeIterator< Key, T, Compare > temp = --it;
-      ++it;
-      while (temp != --cbegin() && equal_key(it.node_->val_type.first, temp.node_->val_type.first))
-      {
-        --it;
-        --temp;
-      }
-      temp = ++it2;
-      --it2;
-      while (temp != cend() && equal_key(it2.node_->val_type.first, temp.node_->val_type.first))
-      {
-        ++it2;
-        ++temp;
-      }
-      return std::pair< ConstTreeIterator< Key, T, Compare >, ConstTreeIterator< Key, T, Compare > >(it, ++it2);
+      for (; first != last; first = erase(first));
+      return first;
     }
-    std::pair< TreeIterator< Key, T, Compare >, TreeIterator< Key, T, Compare > > equal_range(const Key& key)
+    const_iterator erase(const_iterator first, const_iterator last)
     {
-      auto pair = static_cast< const Tree< Key, T, Compare >& >(*this).equal_range(key);
-      TreeIterator< Key, T, Compare > it1(const_cast< detail::TreeNode< Key, T >* >(pair.first.node_));
-      TreeIterator< Key, T, Compare > it2(const_cast< detail::TreeNode< Key, T >* >(pair.second.node_));
-      auto res = it1;
-      while (it1 != it2)
-      {
-        detail::TreeNode< Key, T >* splayNode = it1.node_;
-        ++it1;
-        splay(splayNode);
-      }
-      return std::pair< TreeIterator< Key, T, Compare >, TreeIterator< Key, T, Compare > >(res, it2);
-    }
-    size_t count(const Key& key) const
-    {
-      std::pair< ConstTreeIterator< Key, T, Compare >, ConstTreeIterator< Key, T, Compare > > pair = equal_range(key);
-      size_t sum = 0;
-      while (pair.first != pair.second)
-      {
-        ++sum;
-        ++pair.first;
-      }
-      return sum;
-    }
-    template< class... Args >
-    std::pair< TreeIterator< Key, T, Compare >, bool > emplace(Args&&... args)
-    {
-      return insert(val_type(std::forward< Args >(args)...));
-    }
-    template< class... Args >
-    TreeIterator< Key, T, Compare > emplace_hint(TreeIterator< Key, T, Compare > pos, Args&&... args)
-    {
-      return insert(pos, val_type(std::forward< Args >(args)...));
-    }
-  private:
-    detail::TreeNode< Key, T >* root_;
-    Compare cmp_;
-    size_t size_;
-    detail::TreeNode< Key, T > before_min_;
-    detail::TreeNode< Key, T > end_node_;
-    bool isLeftChild(const detail::TreeNode< Key, T >* node) const
-    {
-      return (node->parent_ && node->parent_->left_ == node);
-    }
-    bool isRightChild(const detail::TreeNode< Key, T >* node) const
-    {
-      return (node->parent_ && node->parent_->right_ == node);
-    }
-    bool cmpLeftNode(const detail::TreeNode< Key, T >* node, const Key& key) const
-    {
-      return (!node->left_ || node->left_ == std::addressof(before_min_) || cmp_(node->left_->val_type.first, key));
-    }
-    bool cmpNodeRight(const detail::TreeNode< Key, T >* node, const Key& key) const
-    {
-      return (!node->right_ || node->right_ == std::addressof(end_node_) || cmp_(key, node->right_->val_type.first));
-    }
-    bool cmpNodeParent(const detail::TreeNode< Key, T >* node, const Key& key) const
-    {
-      return (!root_ || node == root_ || isCorrectLeftChild(node, key) || isCorrectRightChild(node, key));
-    }
-    bool isCorrectLeftChild(const detail::TreeNode< Key, T >* node, const Key& key) const
-    {
-      return isLeftChild(node) && cmp_(key, node->parent_->val_type.first);
-    }
-    bool isCorrectRightChild(const detail::TreeNode< Key, T >* node, const Key& key) const
-    {
-      return isRightChild(node) && cmp_(node->parent_->val_type.first, key);
-    }
-    void zig(detail::TreeNode< Key, T >* node)
-    {
-      detail::TreeNode< Key, T >* temp = node->left_;
-      node->left_ = temp->right_;
-      if (temp->right_)
-      {
-        temp->right_->parent_ = node;
-      }
-      temp->parent_ = node->parent_;
-      temp->right_ = node;
-      if (!node->parent_)
-      {
-        root_ = temp;
-      }
-      else if (isRightChild(node))
-      {
-        node->parent_->right_ = temp;
-      }
-      else
-      {
-        node->parent_->left_ = temp;
-      }
-      node->parent_ = temp;
-    }
-    void zag(detail::TreeNode< Key, T >* node)
-    {
-      detail::TreeNode< Key, T >* temp = node->right_;
-      node->right_ = temp->left_;
-      if (temp->left_)
-      {
-        temp->left_->parent_ = node;
-      }
-      temp->parent_ = node->parent_;
-      temp->left_ = node;
-      if (!node->parent_)
-      {
-        root_ = temp;
-      }
-      else if (isRightChild(node))
-      {
-        node->parent_->right_ = temp;
-      }
-      else
-      {
-        node->parent_->left_ = temp;
-      }
-      node->parent_ = temp;
-    }
-    void splay(detail::TreeNode< Key, T >* node)
-    {
-      while (node->parent_)
-      {
-        if (!node->parent_->parent_)
-        {
-          if (isLeftChild(node))
-          {
-            zig(node->parent_);
-          }
-          else
-          {
-            zag(node->parent_);
-          }
-        }
-        else if (isLeftChild(node->parent_) && isLeftChild(node))
-        {
-          zig(node->parent_);
-          zig(node->parent_);
-        }
-        else if (isLeftChild(node) && isRightChild(node->parent_))
-        {
-          zig(node->parent_);
-          zag(node->parent_);
-        }
-        else if (isRightChild(node) && isLeftChild(node->parent_))
-        {
-          zag(node->parent_);
-          zig(node->parent_);
-        }
-        else
-        {
-          zag(node->parent_);
-          zag(node->parent_);
-        }
-      }
-    }
-    std::pair< TreeIterator< Key, T, Compare >, bool > insert_impl(const val_type& val)
-    {
-      detail::TreeNode< Key, T >* node = new detail::TreeNode< Key, T >(val.first, nullptr, nullptr, nullptr, val.second);
-      detail::TreeNode< Key, T >* curr_node = root_;
-      detail::TreeNode< Key, T >* parent_node = nullptr;
-      while (curr_node != nullptr && (curr_node != std::addressof(end_node_) && curr_node != std::addressof(before_min_)))
-      {
-        if (cmp_(curr_node->val_type.first, node->val_type.first))
-        {
-          if (!curr_node->right_ || curr_node != std::addressof(end_node_))
-          {
-            parent_node = curr_node;
-          }
-          curr_node = curr_node->right_;
-        }
-        else
-        {
-          if (!cmp_(node->val_type.first, curr_node->val_type.first))
-          {
-            delete node;
-            return std::make_pair< TreeIterator< Key, T, Compare >, bool >(TreeIterator< Key, T, Compare >(curr_node), false);
-          }
-          if (!curr_node->left_ || curr_node != std::addressof(end_node_))
-          {
-            parent_node = curr_node;
-          }
-          curr_node = curr_node->left_;
-        }
-      }
-      if (!parent_node)
-      {
-        root_ = node;
-        root_->left_ = std::addressof(before_min_);
-        root_->right_ = std::addressof(end_node_);
-        before_min_.parent_ = root_;
-        end_node_.parent_ = root_;
-      }
-      else if (cmp_(parent_node->val_type.first, node->val_type.first))
-      {
-        if (parent_node->right_ == std::addressof(end_node_))
-        {
-          node->right_ = std::addressof(end_node_);
-          end_node_.parent_ = node;
-        }
-        parent_node->right_ = node;
-      }
-      else if (cmp_(node->val_type.first, parent_node->val_type.first))
-      {
-        if (parent_node->left_ == std::addressof(before_min_))
-        {
-          node->left_ = std::addressof(before_min_);
-          before_min_.parent_ = node;
-        }
-        parent_node->left_ = node;
-      }
-      node->parent_ = parent_node;
-      ++size_;
-      return std::make_pair< TreeIterator< Key, T, Compare >, bool >(TreeIterator< Key, T, Compare >(node), true);
-    }
-    ConstTreeIterator< Key, T, Compare > lower_bound_impl(const Key& key) const
-    {
-      detail::TreeNode< Key, T >* curr_node = root_;
-      while (curr_node && (curr_node != std::addressof(end_node_) && curr_node != std::addressof(before_min_)))
-      {
-        if (cmp_(curr_node->val_type.first, key))
-        {
-          if (!curr_node->right_)
-          {
-            ConstTreeIterator< Key, T, Compare > it(curr_node);
-            return ++it;
-          }
-          curr_node = curr_node->right_;
-        }
-        else
-        {
-          if (!cmp_(key, curr_node->val_type.first) || (curr_node->left_ == std::addressof(before_min_)))
-          {
-            return ConstTreeIterator< Key, T, Compare >(curr_node);
-          }
-          curr_node = curr_node->left_;
-        }
-      }
-      return ConstTreeIterator< Key, T, Compare >(curr_node);
-    }
-    TreeIterator< Key, T, Compare > find_impl(const Key& key)
-    {
-      auto it = static_cast< const Tree< Key, T, Compare >& >(*this).find_impl(key);
-      return TreeIterator< Key, T, Compare >(const_cast< detail::TreeNode< Key, T >* >(it.node_));
-    }
-    ConstTreeIterator< Key, T, Compare > find_impl(const Key& key) const
-    {
-      ConstTreeIterator< Key, T, Compare > it = lower_bound_impl(key);
-      if (!it.node_ || !equal_key(it.node_->val_type.first, key))
-      {
-        return cend();
-      }
-      return it;
-    }
-    bool equal_key(const Key& key1, const Key& key2) const
-    {
-      return !cmp_(key1, key2) && !cmp_(key2, key1);
+      for (; first != last; first = erase(first));
+      return first;
     }
   };
 }

@@ -77,11 +77,11 @@ void readAlphabet(std::istream &input, rav::Tree<char, int> &alphabet)
   input.seekg(0); // перемещаем указатель снова в начало файла
 }
 
-void buildHuffmanTree(rav::List<rav::Node *> &lst, const rav::Tree<char, int> &alphabet, rav::NodeComparator comp)
+void buildHuffmanTree(rav::List<rav::nodePtr> &lst, const rav::Tree<char, int> &alphabet, rav::NodeComparator comp)
 {
   for (auto itr = alphabet.cbegin(); itr != alphabet.cend(); ++itr)
   {
-    rav::Node *p = new rav::Node{};
+    rav::nodePtr p = std::make_shared<rav::Node>();
     p->symbol = itr->first;
     p->frequency = itr->second;
     lst.push_back(p);
@@ -92,17 +92,17 @@ void buildHuffmanTree(rav::List<rav::Node *> &lst, const rav::Tree<char, int> &a
   {
     lst.sort(comp);
 
-    rav::Node *leftChild = lst.front();
+    rav::nodePtr leftChild = lst.front();
     lst.pop_front();
-    rav::Node *rightChild = lst.front();
+    rav::nodePtr rightChild = lst.front();
     lst.pop_front();
 
-    rav::Node *parent = new rav::Node(leftChild, rightChild);
+    rav::nodePtr parent = std::make_shared<rav::Node>(leftChild, rightChild);
     lst.push_back(parent);
   }
 }
 
-void buildTable(rav::Node *root, std::vector<bool> &code, rav::encodeMap &table)
+void buildTable(rav::nodePtr root, std::vector<bool> &code, rav::encodeMap &table)
 {
 
   if (root== nullptr)
@@ -153,10 +153,10 @@ void encodeAndWrite(const rav::encodeMap &table, std::istream &input, std::ostre
   }
 }
 
-void decodeAndWrite(const rav::List<rav::Node *>& travers, std::istream &input, std::ostream &output)
+void decodeAndWrite(const rav::List<rav::nodePtr>& travers, std::istream &input, std::ostream &output)
 {
-  rav::Node *root = travers.front();
-  rav::Node *traverser =root;
+  rav::nodePtr root = travers.front();
+  rav::nodePtr traverser =root;
   int position = 0;
   char byte;
   byte = input.get();
@@ -278,17 +278,17 @@ void rav::createEncoding(std::istream& in, encodesTable& encodings, traverserTab
   }
   rav::Tree<char, int> alphabet;
   readAlphabet(input, alphabet);
-  rav::List<rav::Node*> tree;
+  rav::List<rav::nodePtr> tree;
   buildHuffmanTree(tree, alphabet, rav::NodeComparator());
-  // std::pair< std::string, rav::List< rav::Node *>> item;
+  // std::pair< std::string, rav::List< rav::nodePtr *>> item;
   // item.first = encodingName;
   // item.second = tree;
-  traverses.insert(std::make_pair(encodingName, tree));
+  traverses.insert({encodingName, tree});
   if (tree.empty())
   {
     throw std::logic_error("Empty tree");
   }
-  rav::Node* root = tree.front();
+  rav::nodePtr root = tree.front();
   std::vector<bool> code;
   buildTable(root, code, encodings[encodingName]);
 }
@@ -351,7 +351,7 @@ void rav::decode(std::istream& in, const traverserTable& traverses, fileTable& f
   {
     throw std::logic_error("Couldn't open any file");
   }
-  rav::List<rav::Node*> traverser = traverses.find(encodingName)->second;
+  rav::List<rav::nodePtr> traverser = traverses.find(encodingName)->second;
   decodeAndWrite(traverser, input, output);
   files.insert({decodedName, decodedName});
 }
