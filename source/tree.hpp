@@ -1,8 +1,8 @@
 #ifndef TREE_HPP
 #define TREE_HPP
 #include <algorithm>
-#include <initializer_list>
 #include <memory>
+#include <initializer_list>
 #include <stdexcept>
 
 namespace ravinskij
@@ -540,21 +540,6 @@ namespace ravinskij
         freeNodes(fakeroot_);
       }
     }
-    template< typename InputIt >
-    Tree(InputIt begin, InputIt end):
-      comparator_(),
-      fakeroot_(new Node(-1)),
-      size_(0)
-    {
-      try
-      {
-        createTree(fakeroot_, begin, end, size_);
-      }
-      catch (...)
-      {
-        freeNodes(fakeroot_);
-      }
-    }
     ~Tree()
     {
       freeNodes(fakeroot_);
@@ -593,18 +578,6 @@ namespace ravinskij
       for (; cur->left_; cur = cur->left_);
       return const_iterator(cur);
     }
-    reverse_iterator rbegin() noexcept
-    {
-      return std::make_reverse_iterator(end());
-    }
-    const_reverse_iterator rbegin() const noexcept
-    {
-      return std::make_reverse_iterator(cend());
-    }
-    const_reverse_iterator crbegin() const noexcept
-    {
-      return std::make_reverse_iterator(cend());
-    }
 
     iterator end() noexcept
     {
@@ -617,18 +590,6 @@ namespace ravinskij
     const_iterator cend() const noexcept
     {
       return const_iterator(fakeroot_);
-    }
-    reverse_iterator rend() noexcept
-    {
-      return std::make_reverse_iterator(begin());
-    }
-    const_reverse_iterator rend() const noexcept
-    {
-      return std::make_reverse_iterator(cbegin());
-    }
-    const_reverse_iterator crend() const noexcept
-    {
-      return std::make_reverse_iterator(cbegin());
     }
 
     bool empty() const noexcept
@@ -666,6 +627,7 @@ namespace ravinskij
       }
       return end();
     }
+
     template< class K >
     const_iterator find(const K& x) const
     {
@@ -680,55 +642,13 @@ namespace ravinskij
       }
       return cend();
     }
+
     template< class K >
     size_t count(const K& x) const
     {
       return (find(x) != end());
     }
-    iterator lower_bound(const Key& key)
-    {
-      Node* cur = findHint(fakeroot_->left_, key);
-      if (comparator_(cur->val_.first, key))
-      {
-        return ++iterator(cur);
-      }
-      return iterator(cur);
-    }
-    const_iterator lower_bound(const Key& key) const
-    {
-      Node* cur = findHint(fakeroot_->left_, key);
-      if (comparator_(cur->val_.first, key))
-      {
-        return ++const_iterator(cur);
-      }
-      return const_iterator(cur);
-    }
-    iterator upper_bound(const Key& key)
-    {
-      iterator lb = lower_bound(key);
-      if (lb != end() && !comparator_((*lb).first, key))
-      {
-        return ++lb;
-      }
-      return lb;
-    }
-    const_iterator upper_bound(const Key& key) const
-    {
-      const_iterator lb = lower_bound(key);
-      if (lb != cend() && !comparator_((*lb).first, key))
-      {
-        return ++lb;
-      }
-      return lb;
-    }
-    std::pair< iterator, iterator > equal_range(const Key& key)
-    {
-      return std::make_pair(lower_bound(key), upper_bound(key));
-    }
-    std::pair< const_iterator, const_iterator > equal_range(const Key& key) const
-    {
-      return std::make_pair(lower_bound(key), upper_bound(key));
-    }
+    
     const_iterator find(const Key& key) const
     {
       Node* cur = fakeroot_->left_;
@@ -773,42 +693,6 @@ namespace ravinskij
       }
       throw std::out_of_range("No such element");
     }
-
-    template< class... Args >
-    std::pair< iterator, bool > emplace(Args&&... args)
-    {
-      val_t new_val(std::forward< Args >(args)...);
-      Node* hint = findHint(fakeroot_, new_val.first);
-      if (hint && hint->val_.first == new_val.first)
-      {
-        return std::make_pair(iterator(hint), false);
-      }
-      Node* added = addNode(fakeroot_, hint, new_val.first, new_val.second);
-      ++size_;
-      return std::make_pair(iterator(added), true);
-    }
-    template< class... Args >
-    iterator emplace_hint(const_iterator  pos, Args&&... args)
-    {
-      val_t new_val(std::forward< Args >(args)...);
-      if (empty() || pos == end())
-      {
-        return iterator(addNode(fakeroot_, nullptr, new_val.first, new_val.second));
-      }
-      if (comparator_(new_val, (*pos).first)&&(pos == begin()|| comparator_((*std::prev(pos)).first, new_val)))
-      {
-        return iterator(addNode(fakeroot_, pos.node_, new_val.first, new_val.second));
-      }
-      Node* hint = findHint(fakeroot_, new_val.first);
-      if (hint->val_.first == new_val.first)
-      {
-        return iterator(hint);
-      }
-      else
-      {
-        return iterator(addNode(fakeroot_, hint, new_val.first, new_val.second));
-      }
-    }
     std::pair< iterator, bool > insert(const val_t& val)
     {
       Node* hint = findHint(fakeroot_, val.first);
@@ -836,7 +720,6 @@ namespace ravinskij
     {
       insert(init_list.begin(), init_list.end());
     }
-
     iterator erase(iterator pos)
     {
       Node* for_del = pos.node_;
