@@ -1,6 +1,5 @@
 #include <functional>
 #include <iostream>
-#include <unordered_map>
 #include <string>
 #include <limits>
 #include "commands.hpp"
@@ -27,7 +26,7 @@ int main(int argc, char* argv[])
   traverserTable traverses;
 
   using Command = std::function<void(std::istream &)>;
-  std::unordered_map<std::string, Command> commands;
+  Tree<std::string, Command> commands;
   {
     using namespace std::placeholders;
     commands["add-text"] = std::bind(ravinskij::addText, _1, std::ref(files));

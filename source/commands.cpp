@@ -271,7 +271,6 @@ void rav::createEncoding(std::istream& in, encodesTable& encodings, traverserTab
   {
     throw std::logic_error("Couldn't open file");
   }
-
   rav::Tree<char, int> alphabet;
   readAlphabet(input, alphabet);
   rav::List<rav::Node*> tree;
@@ -282,7 +281,7 @@ void rav::createEncoding(std::istream& in, encodesTable& encodings, traverserTab
   traverses.insert(item);
   rav::Node* root = tree.front();
   std::vector<bool> code;
-  buildTable(root, code, encodings[encodingName]);
+  buildTable(root, code, encodings.at(encodingName));
 }
 
 void rav::deleteEncoding(std::istream& in, encodesTable& encodings, traverserTable& traverses)

@@ -263,9 +263,18 @@ namespace ravinskij
     {
       return lower_bound_impl(key);
     }
+    // T& operator[](const Key& key)
+    // {
+    //   return (((this->insert(std::make_pair(key, T()))).first)->second);
+    // }
     T& operator[](const Key& key)
     {
-      return (((this->insert(std::make_pair(key, T()))).first)->second);
+      auto traverser = find(key);
+      if (find(key) == end())
+      {
+        return insert(std::make_pair(key, T())).first->second;
+      }
+      return traverser->second;
     }
     T& at(const Key& key)
     {
