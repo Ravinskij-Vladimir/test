@@ -4,6 +4,7 @@
 #include <memory>
 #include <initializer_list>
 #include <stdexcept>
+#include "treeIterators.hpp"
 #include "treeNode.hpp"
 
 namespace ravinskij
@@ -12,165 +13,10 @@ namespace ravinskij
   class Tree
   {
     using val_t = std::pair< const Key, T >;
-    //struct Node;
     Compare comparator_;
     TreeNode<Key, T>* fakeroot_;
     size_t size_;
-    // struct TreeNode
-    // {
-    //   val_t val_;
-    //   int height_;
-    //   TreeNode<Key, T>* left_;
-    //   Node<Key, T>* right_;
-    //   Node<Key, T>* parent_;
-
-    //   Node():
-    //     val_(),
-    //     height_(0),
-    //     left_(nullptr),
-    //     right_(nullptr),
-    //     parent_(nullptr)
-    //   {}
-    //   template< class... Args  >
-    //   explicit Node(int height, Args&&... args):
-    //     val_(std::forward< Args >(args)...),
-    //     height_(height),
-    //     left_(nullptr),
-    //     right_(nullptr),
-    //     parent_(nullptr)
-    //   {}
-    //   Node(const Node& other):
-    //     val_(other.val_),
-    //     height_(0),
-    //     left_(nullptr),
-    //     right_(nullptr),
-    //     parent_(nullptr)
-    //   {}
-    //   Node(Node&& other):
-    //     val_(std::move(other.val_)),
-    //     height_(height_),
-    //     left_(other.left_),
-    //     right_(other.right_),
-    //     parent_(other.parent_)
-    //   {
-    //     other.height_ = 0;
-    //     other.left_ = nullptr;
-    //     other.right_ = nullptr;
-    //     other.parent_ = nullptr;
-    //   }
-    //   static int depth(Node<Key, T>* node)
-    //   {
-    //     return node ? node->height_ + 1 : 0;
-    //   }
-    //   void clear()
-    //   {
-    //     height_ = 0;
-    //     left_ = nullptr;
-    //     right_ = nullptr;
-    //     parent_ = nullptr;
-    //   }
-    //   bool updateHeight()
-    //   {
-    //     int old_height = height_;
-    //     height_ = std::max(depth(left_), depth(right_));
-    //     return old_height != height_;
-    //   }
-    //   void rotate()
-    //   {
-    //     Node<Key, T>* root = this;
-    //     Node<Key, T>* parent = root->parent_;
-    //     bool left = (root == parent->left_);
-    //     if (depth(left_) < depth(right_))
-    //     {
-    //       root = (depth(right_->left_) <= depth(right_->right_)) ? root->rotateLeft() : root->rotateLeftRight();
-    //     }
-    //     else
-    //     {
-    //       root = (depth(left_->right_) <= depth(left_->left_)) ? root->rotateRight() : root->rotateRightLeft();
-    //     }
-    //     root->parent_ = parent;
-    //     (left ? parent->left_ : parent->right_) = root;
-    //     return;
-    //   }
-    // private:
-    //   Node<Key, T>* rotateLeft()
-    //   {
-    //     Node<Key, T>* root = this;
-    //     Node<Key, T>* new_root = root->right_;
-    //     root->right_ = new_root->left_;
-    //     if (new_root->left_)
-    //     {
-    //       new_root->left_->parent_ = root;
-    //     }
-    //     new_root->left_ = root;
-    //     root->parent_ = new_root;
-    //     root->updateHeight();
-    //     new_root->updateHeight();
-    //     return new_root;
-    //   }
-    //   Node<Key, T>* rotateRight()
-    //   {
-    //     Node<Key, T>* root = this;
-    //     Node<Key, T>* new_root = root->left_;
-    //     root->left_ = new_root->right_;
-    //     if (new_root->right_)
-    //     {
-    //       new_root->right_->parent_ = root;
-    //     }
-    //     new_root->right_ = root;
-    //     root->parent_ = new_root;
-    //     root->updateHeight();
-    //     new_root->updateHeight();
-    //     return new_root;
-    //   }
-    //   Node<Key, T>* rotateLeftRight()
-    //   {
-    //     Node<Key, T>* root = this;
-    //     Node<Key, T>* new_root = root->right_->left_;
-    //     root->right_->left_ = new_root->right_;
-    //     if (new_root->right_)
-    //     {
-    //       new_root->right_->parent_ = root->right_;
-    //     }
-    //     new_root->right_ = root->right_;
-    //     root->right_->parent_ = new_root;
-    //     root->right_ = new_root->left_;
-    //     if (new_root->left_)
-    //     {
-    //       new_root->left_->parent_ = root;
-    //     }
-    //     new_root->left_ = root;
-    //     root->parent_ = new_root;
-    //     root->updateHeight();
-    //     new_root->right_->updateHeight();
-    //     new_root->updateHeight();
-    //     return new_root;
-    //   }
-    //   Node<Key, T>* rotateRightLeft()
-    //   {
-    //     Node<Key, T>* root = this;
-    //     Node<Key, T>* new_root = root->left_->right_;
-    //     root->left_->right_ = new_root->left_;
-    //     if (new_root->left_)
-    //     {
-    //       new_root->left_->parent_ = root->left_;
-    //     }
-    //     new_root->left_ = root->left_;
-    //     root->left_->parent_ = new_root;
-    //     root->left_ = new_root->right_;
-    //     if (new_root->right_)
-    //     {
-    //       new_root->right_->parent_ = root;
-    //     }
-    //     new_root->right_ = root;
-    //     root->parent_ = new_root;
-    //     root->updateHeight();
-    //     new_root->left_->updateHeight();
-    //     new_root->updateHeight();
-    //     return new_root;
-    //   }
-    // };
-   
+    
     TreeNode<Key, T>* findHint(TreeNode<Key, T>* root, const Key& key)
     {
       TreeNode<Key, T>* cur = (root->height_ < 0) ? root->left_ : root;
@@ -382,103 +228,101 @@ namespace ravinskij
       return fakeroot;
     }
 
-    template< bool IsConst >
-    class BaseIterator
-    {
-      template< bool U > friend class BaseIterator;
-      template< typename T1, typename T2, class T3 > friend class Tree;
-      using val_t = std::conditional_t< IsConst, const std::pair< const Key, T >, std::pair< const Key, T > >;
-      using prt_t = std::conditional_t< IsConst, const val_t*, val_t* >;
-      using ref_t = std::conditional_t< IsConst, const val_t&, val_t& >;
-      using node_t = TreeNode<Key, T>*;
+    // template< bool IsConst >
+    // class BaseIterator
+    // {
+    //   template< bool U > friend class BaseIterator;
+    //   template< typename T1, typename T2, class T3 > friend class Tree;
+    //   using val_t = std::conditional_t< IsConst, const std::pair< const Key, T >, std::pair< const Key, T > >;
+    //   using prt_t = std::conditional_t< IsConst, const val_t*, val_t* >;
+    //   using ref_t = std::conditional_t< IsConst, const val_t&, val_t& >;
+    //   using node_t = TreeNode<Key, T>*;
 
-      node_t node_;
-    public:
-      using iterator_category = std::bidirectional_iterator_tag;
-      using value_type = val_t;
-      using difference_type = std::ptrdiff_t;
-      using pointer = prt_t;
-      using reference = ref_t;
+    //   node_t node_;
+    // public:
+    //   using iterator_category = std::bidirectional_iterator_tag;
+    //   using value_type = val_t;
+    //   using difference_type = std::ptrdiff_t;
+    //   using pointer = prt_t;
+    //   using reference = ref_t;
 
-      BaseIterator() noexcept:
-        node_(nullptr)
-      {}
-      BaseIterator(const BaseIterator& other) noexcept:
-        node_(other.node_)
-      {}
-      explicit BaseIterator(node_t node) noexcept:
-        node_(node)
-      {}
-      template< bool cond = IsConst, std::enable_if_t< cond, bool > = true >
-      BaseIterator(const BaseIterator< !cond >& other) noexcept:
-        node_(other.node_)
-      {}
-      BaseIterator& operator=(const BaseIterator& other) noexcept
-      {
-        node_ = other.node_;
-      }
-      BaseIterator& operator++()
-      {
-        if (node_->right_)
-        {
-          node_ = node_->right_;
-          for (; node_->left_; node_ = node_->left_);
-        }
-        else
-        {
-          for (; node_ == node_->parent_->right_; node_ = node_->parent_);
-          node_ = node_->parent_;
-        }
-        return *this;
-      }
-      BaseIterator operator++(int)
-      {
-        BaseIterator copy = *this;
-        ++(*this);
-        return copy;
-      }
-      BaseIterator& operator--()
-      {
-        if (node_->left_)
-        {
-          node_ = node_->left_;
-          for (; node_->right_; node_ = node_->right_);
-        }
-        else
-        {
-          for (; node_ == node_->parent_->left_; node_ = node_->parent_);
-          node_ = node_->parent_;
-        }
-        return *this;
-      }
-      BaseIterator operator--(int)
-      {
-        BaseIterator copy = *this;
-        --(*this);
-        return copy;
-      }
-      ref_t operator*() const
-      {
-        return node_->val_;
-      }
-      prt_t operator->() const
-      {
-        return std::addressof(node_->val_);
-      }
-      bool operator!=(const BaseIterator& other) const noexcept
-      {
-        return node_ != other.node_;
-      }
-      bool operator==(const BaseIterator& other) const noexcept
-      {
-        return node_ == other.node_;
-      }
-    };
+    //   BaseIterator() noexcept:
+    //     node_(nullptr)
+    //   {}
+    //   BaseIterator(const BaseIterator& other) noexcept:
+    //     node_(other.node_)
+    //   {}
+    //   explicit BaseIterator(node_t node) noexcept:
+    //     node_(node)
+    //   {}
+    //   template< bool cond = IsConst, std::enable_if_t< cond, bool > = true >
+    //   BaseIterator(const BaseIterator< !cond >& other) noexcept:
+    //     node_(other.node_)
+    //   {}
+    //   BaseIterator& operator=(const BaseIterator& other) noexcept
+    //   {
+    //     node_ = other.node_;
+    //   }
+    //   BaseIterator& operator++()
+    //   {
+    //     if (node_->right_)
+    //     {
+    //       node_ = node_->right_;
+    //       for (; node_->left_; node_ = node_->left_);
+    //     }
+    //     else
+    //     {
+    //       for (; node_ == node_->parent_->right_; node_ = node_->parent_);
+    //       node_ = node_->parent_;
+    //     }
+    //     return *this;
+    //   }
+    //   BaseIterator operator++(int)
+    //   {
+    //     BaseIterator copy = *this;
+    //     ++(*this);
+    //     return copy;
+    //   }
+    //   BaseIterator& operator--()
+    //   {
+    //     if (node_->left_)
+    //     {
+    //       node_ = node_->left_;
+    //       for (; node_->right_; node_ = node_->right_);
+    //     }
+    //     else
+    //     {
+    //       for (; node_ == node_->parent_->left_; node_ = node_->parent_);
+    //       node_ = node_->parent_;
+    //     }
+    //     return *this;
+    //   }
+    //   BaseIterator operator--(int)
+    //   {
+    //     BaseIterator copy = *this;
+    //     --(*this);
+    //     return copy;
+    //   }
+    //   ref_t operator*() const
+    //   {
+    //     return node_->val_;
+    //   }
+    //   prt_t operator->() const
+    //   {
+    //     return std::addressof(node_->val_);
+    //   }
+    //   bool operator!=(const BaseIterator& other) const noexcept
+    //   {
+    //     return node_ != other.node_;
+    //   }
+    //   bool operator==(const BaseIterator& other) const noexcept
+    //   {
+    //     return node_ == other.node_;
+    //   }
+    // };
   public:
-    using iterator = BaseIterator< false >;
-    using const_iterator = BaseIterator< true >;
-    using reverse_iterator = std::reverse_iterator< iterator >;
-    using const_reverse_iterator = std::reverse_iterator< const_iterator >;
+    using iterator = TreeIterator< Key, T, Compare >;
+    using const_iterator = ConstTreeIterator< Key, T, Compare >;
     Tree():
       comparator_(),
       fakeroot_(new TreeNode<Key, T>(-1)),

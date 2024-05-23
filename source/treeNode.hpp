@@ -7,8 +7,8 @@ namespace ravinskij
 template < class Key, class T >
 struct TreeNode
     {
-      using val_t = std::pair< const Key, T >;
-      val_t val_;
+      using val_type = std::pair< Key, T >;
+      val_type val_;
       int height_;
       TreeNode* left_;
       TreeNode* right_;
