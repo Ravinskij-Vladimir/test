@@ -63,9 +63,6 @@ void readAlphabet(std::istream &input, rav::Tree<char, int> &alphabet)
     input >> c;
     alphabet[c]++;
   }
-
-  input.clear();
-  input.seekg(0); // перемещаем указатель снова в начало файла
 }
 
 void buildHuffmanTree(rav::List<rav::nodePtr> &lst, const rav::Tree<char, int> &alphabet, rav::NodeComparator comp)
@@ -78,7 +75,6 @@ void buildHuffmanTree(rav::List<rav::nodePtr> &lst, const rav::Tree<char, int> &
     lst.push_back(p);
   }
 
-  //////  создаем дерево
   while (lst.size() != 1)
   {
     lst.sort(comp);
