@@ -58,9 +58,9 @@ namespace ravinskij
     template< class Compare >
     void sort(Compare comp);
   private:
-    detail::ListNode< T > imaginary_node_;
-    detail::ListNode< T >* head_;
-    detail::ListNode< T >* tail_;
+    ListNode< T > imaginary_node_;
+    ListNode< T >* head_;
+    ListNode< T >* tail_;
     size_t size_;
   };
 
@@ -105,7 +105,7 @@ namespace ravinskij
     List()
   {
     imaginary_node_ = rhs.imaginary_node_;
-    detail::ListNode< T >* node = rhs.head_;
+    ListNode< T >* node = rhs.head_;
     while (size_ != rhs.size_)
     {
       push_back(node->value_);
@@ -127,8 +127,8 @@ namespace ravinskij
   bool List< T >::operator<(const List< T >& rhs) const
   {
     size_t min_size = std::min(rhs.size_, size_);
-    detail::ListNode< T >* node = head_;
-    detail::ListNode< T >* rhs_node = rhs.head_;
+    ListNode< T >* node = head_;
+    ListNode< T >* rhs_node = rhs.head_;
     for (size_t i = 0; i < min_size; ++i)
     {
       if (node->value_ != rhs_node->value_)
@@ -159,8 +159,8 @@ namespace ravinskij
   bool List< T >::operator==(const List< T >& rhs) const
   {
     size_t min_size = std::min(rhs.size_, size_);
-    detail::ListNode< T >* node = head_;
-    detail::ListNode< T >* rhs_node = rhs.head_;
+    ListNode< T >* node = head_;
+    ListNode< T >* rhs_node = rhs.head_;
     for (size_t i = 0; i < min_size; ++i)
     {
       if (!(node->value_ == rhs_node->value_))
@@ -255,7 +255,7 @@ namespace ravinskij
   template< class T >
   ConstListIterator< T > List< T >::cend() const noexcept
   {
-    return ConstListIterator< T >(const_cast< detail::ListNode< T >* >(std::addressof(imaginary_node_)));
+    return ConstListIterator< T >(const_cast< ListNode< T >* >(std::addressof(imaginary_node_)));
   }
   template< class T >
   ConstListIterator< T > List< T >::erase(ConstListIterator< T > it)
@@ -293,7 +293,7 @@ namespace ravinskij
   {
     if (size_ == 0)
     {
-      detail::ListNode< T >* node = new detail::ListNode< T >{std::addressof(imaginary_node_), nullptr, value};
+      ListNode< T >* node = new ListNode< T >{std::addressof(imaginary_node_), nullptr, value};
       imaginary_node_.prev_ = node;
       head_ = node;
       tail_ = node;
@@ -301,7 +301,7 @@ namespace ravinskij
       ListIterator< T > result(head_);
       return result;
     }
-    detail::ListNode< T >* node = new detail::ListNode< T >{it.node, it.node->prev_, value};
+    ListNode< T >* node = new ListNode< T >{it.node, it.node->prev_, value};
     it.node->prev_ = node;
     if (it.node == head_)
     {
@@ -429,10 +429,10 @@ namespace ravinskij
   template< class Compare >
   void List< T >::sort(Compare comp)
   {
-    detail::ListNode< T >* node1 = head_;
+    ListNode< T >* node1 = head_;
     for (size_t i = 0; i < size_; ++i)
     {
-      detail::ListNode< T >* node2 = node1;
+      ListNode< T >* node2 = node1;
       for (size_t j = i; j < size_; ++j)
       {
         if (comp(node1->value_, node2->value_))

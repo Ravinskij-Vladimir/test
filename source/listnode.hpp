@@ -4,22 +4,20 @@
 
 namespace ravinskij
 {
-  namespace detail
+  template <class T>
+  struct ListNode
   {
-    template< class T >
-    struct ListNode
+    template <class... Args>
+    ListNode(ListNode *next, ListNode *prev, Args &&...args) : 
+      value_(std::forward<Args>(args)...),
+      next_(next),
+      prev_(prev)
     {
-      template< class... Args >
-      ListNode(ListNode* next, ListNode* prev, Args&& ...args):
-        value_(std::forward< Args >(args)...),
-        next_(next),
-        prev_(prev)
-      {}
-      ~ListNode() = default;
-      T value_;
-      ListNode* next_;
-      ListNode* prev_;
-    };
-  }
+    }
+    ~ListNode() = default;
+    T value_;
+    ListNode *next_;
+    ListNode *prev_;
+  };
 }
 #endif

@@ -66,8 +66,8 @@ namespace ravinskij
       return node->value_;
     }
   private:
-    detail::ListNode< T >* node;
-    explicit ListIterator(detail::ListNode< T >* nd):
+    ListNode< T >* node;
+    explicit ListIterator(ListNode< T >* nd):
       node(nd)
     {}
   };
@@ -121,8 +121,8 @@ namespace ravinskij
       return node->value_;
     }
   private:
-    detail::ListNode< T >* node;
-    explicit ConstListIterator(detail::ListNode< T >* nd):
+    ListNode< T >* node;
+    explicit ConstListIterator(ListNode< T >* nd):
       node(nd)
     {}
   };
