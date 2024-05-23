@@ -6,7 +6,6 @@
 #include <iomanip>
 #include "Node.hpp"
 #include "scopeGuard.hpp"
-#include "delimeter.hpp"
 
 namespace rav = ravinskij;
 
