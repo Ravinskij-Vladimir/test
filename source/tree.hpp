@@ -230,7 +230,7 @@ namespace ravinskij
 
   public:
     using iterator = TreeIterator< Key, T, Compare >;
-    using const_iterator = ConstTreeIterator< Key, T, Compare >;
+    using constIterator = ConstTreeIterator< Key, T, Compare >;
     Tree():
       comparator_(),
       fakeroot_(new TreeNode<Key, T>(-1)),
@@ -326,28 +326,28 @@ namespace ravinskij
       for (; cur->left_; cur = cur->left_);
       return iterator(cur);
     }
-    const_iterator begin() const noexcept
+    constIterator begin() const noexcept
     {
       return cbegin();
     }
-    const_iterator cbegin() const noexcept
+    constIterator cbegin() const noexcept
     {
       TreeNode<Key, T>* cur = fakeroot_;
       for (; cur->left_; cur = cur->left_);
-      return const_iterator(cur);
+      return constIterator(cur);
     }
 
     iterator end() noexcept
     {
       return iterator(fakeroot_);
     }
-    const_iterator end() const noexcept
+    constIterator end() const noexcept
     {
-      return const_iterator(fakeroot_);
+      return constIterator(fakeroot_);
     }
-    const_iterator cend() const noexcept
+    constIterator cend() const noexcept
     {
-      return const_iterator(fakeroot_);
+      return constIterator(fakeroot_);
     }
 
     bool empty() const noexcept
@@ -387,14 +387,14 @@ namespace ravinskij
     }
 
     template< class K >
-    const_iterator find(const K& x) const
+    constIterator find(const K& x) const
     {
       TreeNode<Key, T>* cur = fakeroot_.left_;
       while (cur)
       {
         if (cur->val_.first == x)
         {
-          return const_iterator(cur);
+          return constIterator(cur);
         }
         cur = (comparator_(cur->val_.first, x)) ? cur->left_ : cur->right_;
       }
@@ -407,14 +407,14 @@ namespace ravinskij
       return (find(x) != end());
     }
     
-    const_iterator find(const Key& key) const
+    constIterator find(const Key& key) const
     {
       TreeNode<Key, T>* cur = fakeroot_->left_;
       while (cur)
       {
         if (cur->val_.first == key)
         {
-          return const_iterator(cur);
+          return constIterator(cur);
         }
         cur = (comparator_(cur->val_.first, key)) ? cur->right_ : cur->left_;
       }
@@ -445,7 +445,7 @@ namespace ravinskij
     }
     const T& at(const Key& key) const
     {
-      const_iterator cur = find(key);
+      constIterator cur = find(key);
       if (cur != cend())
       {
         return cur->second;
@@ -483,7 +483,7 @@ namespace ravinskij
       eraseNode(for_del);
       return pos;
     }
-    const_iterator erase(const_iterator pos)
+    constIterator erase(constIterator pos)
     {
       TreeNode<Key, T>* for_del = pos.node_;
       ++pos;
@@ -505,7 +505,7 @@ namespace ravinskij
       for (; first != last; first = erase(first));
       return first;
     }
-    const_iterator erase(const_iterator first, const_iterator last)
+    constIterator erase(constIterator first, constIterator last)
     {
       for (; first != last; first = erase(first));
       return first;
