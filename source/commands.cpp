@@ -261,7 +261,7 @@ void rav::createEncoding(std::istream& in, encodesTable& encodings, traverserTab
 {
   std::string textName, encodingName;
   in >> textName >> encodingName;
-  if (encodings.find(encodingName) != encodings.cend())
+  if (encodings.find(encodingName) != encodings.end())
   {
     throw std::logic_error("Such encoding already exists");
   }
@@ -289,7 +289,7 @@ void rav::deleteEncoding(std::istream& in, encodesTable& encodings, traverserTab
 {
   std::string encodingName;
   in >> encodingName;
-  if (encodings.find(encodingName) == encodings.cend())
+  if (encodings.find(encodingName) == encodings.end())
   {
     throw std::logic_error("No such encoding is provided");
   }
@@ -346,102 +346,4 @@ void rav::decode(std::istream& in, const traverserTable& traverses, fileTable& f
   rav::List<rav::Node*> traverser = traverses.find(encodingName)->second;
   decodeAndWrite(traverser, input, output);
   files.insert({decodedName, decodedName});
-}
-
-
-void rav::addEncoding(std::istream& in, encodesTable& encodings)
-{
-  std::string encodingName, fileName;
-  in >> encodingName >> fileName;
-  if (encodings.find(encodingName) != encodings.cend())
-  {
-    throw std::logic_error("Such encoding already exists");
-  }
-  std::ifstream input(fileName);
-  if (!input.is_open())
-  {
-    throw std::logic_error("Couldn't open file");
-  }
-  //input >> encodingName;
-  rav::encodeMap map;
-  while (!input.eof())
-  {
-    char ch = 0;
-    std::vector<bool> code;
-    input >> ReadWrapper{ch, code};
-    std::cout << WriteWrapper{ch, code} <<  '\n';
-    map.insert({ch, code});
-  }
-  encodings.insert({encodingName, map});
-}
-
-void rav::saveEncoding(std::istream& in, encodesTable& encodings)
-{
-  std::string encodingName, fileName;
-  in >> encodingName >> fileName;
-  auto currEncoding = encodings.find(encodingName);
-  if (currEncoding == encodings.cend())
-  {
-    throw std::logic_error("No such encoding is provided");
-  }
-  std::ofstream output(fileName);
-  auto beginIt = currEncoding->second.cbegin();
-  auto endIt = currEncoding->second.cend();
-  output << WriteWrapper{beginIt->first, beginIt->second};
-  ++beginIt;
-  for (auto it = beginIt; it != endIt; ++it)
-  {
-    output << '\n' << WriteWrapper{it->first, it->second};
-  }
-}
-
-double getCompessionPercentage(size_t oldSize, size_t newSize)
-{
-  return static_cast<double>((oldSize - newSize)) / oldSize;
-}
-
-void rav::compareEncodings(std::istream& in, const fileTable& files, const encodesTable& encodings)
-{
-  std::string arg;
-  std::list<std::string> args;
-  ScopeGuard guard(in);
-  in >> std::noskipws;
-  char delim = 0;
-  in >> delim;
-  while (in && delim != '\n')
-  {
-    in >> arg >> delim;
-    if (in)
-    {
-      args.push_back(arg);
-    }
-  }
-  if (args.empty())
-  {
-    throw std::logic_error("No arguments are provided");
-  }
-  std::string fileName = args.front();
-  args.pop_front();
-  if (files.find(fileName) == files.cend())
-  {
-    throw std::logic_error("No such file is provided");
-  }
-  std::cout << getFileSize(files.find(fileName)->second) << '\n';
-  std::ifstream file(files.find(fileName)->second);
-  std::cout << std::fixed << std::setprecision(2);
-  size_t fileSize = getFileSize(files.find(fileName)->second);
-  std::cout << fileName << ' ' << fileSize << ' ' << getCompessionPercentage(fileSize, fileSize) << '\n';
-  for (const auto& arg: args)
-  {
-    if (encodings.find(arg) == encodings.cend())
-    {
-      throw std::logic_error("No such encoding is provided");
-    }
-    std::ofstream out(arg, std::ios::binary);
-    encodeAndWrite(encodings.find(arg)->second, file, out);
-    out.close();
-    size_t compressedSize = getFileSize(arg);
-    std::cout << arg << ' ' << compressedSize << ' ' << getCompessionPercentage(fileSize, compressedSize) << '\n';
-  }
-  //encodeMap encode = encodings.at(encoding);
 }
