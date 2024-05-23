@@ -169,6 +169,7 @@ namespace ravinskij
         return new_root;
       }
     };
+   
     Node* findHint(Node* root, const Key& key)
     {
       Node* cur = (root->height_ < 0) ? root->left_ : root;
@@ -742,34 +743,36 @@ namespace ravinskij
       return cend();
     }
 
-    T& at(const Key& key)
-    {
-      Node* cur = findHint(fakeroot_->left_, key);
-      if (cur && cur->val_.first == key)
-      {
-        return cur->val_.second;
-      }
-      throw std::out_of_range("No such element");
-    }
-    const T& at(const Key& key) const
-    {
-      Node* cur = findHint(fakeroot_->left_, key);
-      if (cur && cur->val_.first == key)
-      {
-        return cur->val_.second;
-      }
-      throw std::out_of_range("No such element");
-    }
     T& operator[](const Key& key)
     {
-      Node* cur = findHint(fakeroot_, key);
-      if (cur && cur->val_.first == key)
+      Node* traverser = findHint(fakeroot_, key);
+      if (!traverser)
       {
-        return cur->val_.second;
+        Node* added = addNode(fakeroot_, traverser, key, T{});
+        ++size_;
+        return added->val_.second;
       }
-      Node* added = addNode(fakeroot_, cur, key, T{});
-      ++size_;
-      return added->val_.second;
+      return traverser->val_.second;
+    }
+
+    T& at(const Key& key)
+    {
+      Node* traverser = findHint(fakeroot_, key);
+      if (traverser)
+      {
+        return traverser->val_.second;
+      }
+      throw std::out_of_range("No such element");
+    }
+
+    const T& at(const Key& key) const
+    {
+      const Node* traverser = findHint(fakeroot_, key);
+      if (traverser)
+      {
+        return traverser->val_.second;
+      }
+      throw std::out_of_range("No such element");
     }
 
     template< class... Args >
