@@ -515,31 +515,32 @@ namespace ravinskij
 
     T& operator[](const Key& key)
     {
-      TreeNode<Key, T>* cur = findHint(fakeroot_, key);
-      if (cur && cur->val_.first == key)
+      iterator cur = find(key);
+      if (cur != end())
       {
-        return cur->val_.second;
+        return cur->second;
       }
-      TreeNode<Key, T>* added = addNode(fakeroot_, cur, key, T{});
+      //TreeNode<Key, T>* added = addNode(fakeroot_, cur, key, T{});
+      iterator added = insert({key, T()}).first;
       ++size_;
-      return added->val_.second;
+      return added->second;
     }
 
     T& at(const Key& key)
     {
-      TreeNode<Key, T>* cur = findHint(fakeroot_->left_, key);
-      if (cur && cur->val_.first == key)
+      iterator cur = find(key);
+      if (cur != end())
       {
-        return cur->val_.second;
+        return cur->second;
       }
       throw std::out_of_range("No such element");
     }
     const T& at(const Key& key) const
     {
-      const TreeNode<Key, T>* cur = findHint(fakeroot_->left_, key);
-      if (cur && cur->val_.first == key)
+      const_iterator cur = find(key);
+      if (cur != cend())
       {
-        return cur->val_.second;
+        return cur->second;
       }
       throw std::out_of_range("No such element");
     }
@@ -554,10 +555,10 @@ namespace ravinskij
       ++size_;
       return std::make_pair(iterator(added), true);
     }
-    iterator insert(const_iterator pos, const val_t& val)
-    {
-      return emplace_hint(pos, val);
-    }
+    // iterator insert(const_iterator pos, const val_t& val)
+    // {
+    //   return emplace_hint(pos, val);
+    // }
     template< class InputIt >
     void insert(InputIt first, InputIt last)
     {
