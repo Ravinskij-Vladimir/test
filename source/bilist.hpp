@@ -28,17 +28,9 @@ namespace ravinskij
     List< T >& operator=(List< T >&& rhs);
     List< T >& operator=(const List< T >& rhs);
     ~List();
-    void assign(const T& value, size_t count);
-    template< class Iterator >
-    void assign(Iterator start, Iterator finish);
-    void assign(std::initializer_list< T > il);
+    
     void remove(const T& value);
-    void splice(ConstListIterator< T > it, List< T >& list);
-    void splice(ConstListIterator< T > it, List< T >& list, ConstListIterator< T > list_it);
-    void splice(ConstListIterator< T > it, List< T >& list, ConstListIterator< T > list_start, ConstListIterator< T > list_finish);
-    void reverse() noexcept;
-    template< class Functor >
-    void remove_if(Functor f);
+  
     void swap(List< T >& list);
     size_t size() const noexcept;
     T& back();
@@ -62,17 +54,9 @@ namespace ravinskij
     void pop_back();
     void pop_front();
     void clear() noexcept;
-    void unique();
-    template< class Pred >
-    void unique(Pred p);
     void sort();
     template< class Compare >
     void sort(Compare comp);
-    template< class Compare >
-    void merge(List< T >& list, Compare comp);
-    void merge(List< T >& list);
-    template< class... Args >
-    ListIterator< T > emplace(ConstListIterator< T > it, Args&&... args);
   private:
     detail::ListNode< T > imaginary_node_;
     detail::ListNode< T >* head_;
@@ -218,167 +202,8 @@ namespace ravinskij
   {
     clear();
   }
-  template< class T >
-  void List< T >::assign(const T& value, size_t count)
-  {
-    ConstListIterator< T > old_end;
-    if (!empty())
-    {
-      old_end = --cend();
-    }
-    try
-    {
-      for (size_t i = 0; i < count; ++i)
-      {
-        push_back(value);
-      }
-      if (old_end.node)
-      {
-        erase(cbegin(), ++old_end);
-      }
-    }
-    catch (const std::exception& e)
-    {
-      if (old_end.node)
-      {
-        erase(cbegin(), ++old_end);
-      }
-      else
-      {
-        clear();
-      }
-      throw;
-    }
-  }
-  template< class T >
-  template< class Iterator >
-  void List< T >::assign(Iterator start, Iterator finish)
-  {
-    try
-    {
-      clear();
-      head_ = nullptr;
-      tail_ = nullptr;
-      while (start != finish)
-      {
-        push_back(*start++);
-      }
-    }
-    catch (const std::exception& e)
-    {
-      clear();
-      throw;
-    }
-  }
-  template< class T >
-  void List< T >::assign(std::initializer_list< T > il)
-  {
-    assign(il.begin(), il.end());
-  }
-  template< class T >
-  void List< T >::remove(const T& value)
-  {
-    auto functor = [&](const T& n) -> bool
-    {
-      return value == n;
-    };
-    remove_if(functor);
-  }
-  template< class T >
-  void List< T >::splice(ConstListIterator< T > it, List< T >& list)
-  {
-    if (it == cbegin())
-    {
-      head_->prev_ = list.tail_;
-      list.tail_->next_ = head_;
-      head_ = list.head_;
-      size_ += list.size_;
-    }
-    else if (it == cend())
-    {
-      list.head_->prev_ = tail_;
-      tail_->next_ = list.head_;
-      tail_ = list.tail_;
-      size_ += list.size_;
-    }
-    else
-    {
-      it.node->prev_->next_ = list.head_;
-      list.tail_->next_ = it.node;
-      list.head_->prev_ = it.node->prev_;
-      it.node->prev_ = list.tail_;
-      size_ += list.size_;
-    }
-    list.head_ = nullptr;
-    list.tail_ = nullptr;
-    list.size_ = 0;
-  }
-  template< class T >
-  void List< T >::splice(ConstListIterator< T > it, List< T >& list, ConstListIterator< T > list_it)
-  {
-    insert(it, *list_it);
-    list.erase(list_it);
-  }
-  template< class T >
-  void List< T >::splice(ConstListIterator< T > it, List< T >& list, ConstListIterator< T > list_start, ConstListIterator< T > list_finish)
-  {
-    while (list_start != list_finish)
-    {
-      splice(it, list, list_start++);
-    }
-  }
-  template< class T >
-  void List< T >::reverse() noexcept
-  {
-    std::swap(head_->prev_, tail_->next_);
-    detail::ListNode< T >* node = head_;
-    while (node)
-    {
-      detail::ListNode< T >* next_node = node->next_;
-      std::swap(node->prev_, node->next_);
-      node = next_node;
-    }
-    std::swap(head_, tail_);
-  }
-  template< class T >
-  template< class Functor >
-  void List< T >::remove_if(Functor f)
-  {
-    ConstListIterator< T > it(head_);
-    if (!empty())
-    {
-      while (it != cend())
-      {
-        if (f(it.node->value_))
-        {
-          if (it == cbegin())
-          {
-            pop_front();
-            it.node = head_;
-          }
-          else if (it == --cend())
-          {
-            pop_back();
-            it.node = nullptr;
-            break;
-          }
-          else
-          {
-            detail::ListNode< T >* temp = it.node;
-            it.node->next_->prev_ = it.node->prev_;
-            it.node->prev_->next_ = it.node->next_;
-            ++it;
-            delete temp;
-            --size_;
-          }
-        }
-        else
-        {
-          ++it;
-        }
-      }
-    }
-  }
+  
+  
   template< class T >
   void List< T >::swap(List< T >& list)
   {
@@ -590,52 +415,7 @@ namespace ravinskij
       pop_front();
     }
   }
-  template< class T >
-  void List< T >::unique()
-  {
-    auto comp = [](const T& lhs, const T& rhs)
-    {
-      return lhs == rhs;
-    };
-    unique(comp);
-  }
-  template< class T >
-  template< class Pred >
-  void List< T >::unique(Pred p)
-  {
-    ConstListIterator< T > it(head_);
-    ConstListIterator< T > end(tail_);
-    while (it != cend() && it.node)
-    {
-      ConstListIterator< T > temp(it);
-      ++temp;
-      while (temp != cend())
-      {
-        ConstListIterator< T > temp_end(tail_);
-        end = temp_end;
-        if (temp == end)
-        {
-          if (p(*temp, *it))
-          {
-            erase(temp);
-          }
-          break;
-        }
-        if (p(*temp, *it))
-        {
-          ConstListIterator< T > temp2(temp);
-          ++temp2;
-          erase(temp);
-          temp = temp2;
-        }
-        else
-        {
-          ++temp;
-        }
-      }
-      ++it;
-    }
-  }
+  
   template< class T >
   void List< T >::sort()
   {
@@ -663,57 +443,6 @@ namespace ravinskij
       }
       node1 = node1->next_;
     }
-  }
-  template< class T >
-  template< class Compare >
-  void List< T >::merge(List< T >& list, Compare comp)
-  {
-    ConstListIterator< T > start(head_);
-    ConstListIterator< T > list_start(list.head_);
-    if (size_ != 0)
-    {
-      while (list_start != list.cend() && list.size_ != 0)
-      {
-        if (comp(*start, *list_start))
-        {
-          splice(start, list, list_start++);
-        }
-        else
-        {
-          ++start;
-          if (start == cend())
-          {
-            tail_->next_ = list_start.node;
-            list_start.node->prev_ = tail_;
-            tail_ = list.tail_;
-            break;
-          }
-        }
-      }
-    }
-    else
-    {
-      *this = std::move(list);
-    }
-    size_ += list.size_;
-    list.head_ = nullptr;
-    list.tail_ = nullptr;
-    list.size_ = 0;
-  }
-  template< class T >
-  void List< T >::merge(List< T >& list)
-  {
-    auto comp = [](const T& lhs, const T& rhs)
-    {
-      return lhs >= rhs;
-    };
-    merge(list, comp);
-  }
-  template< class T >
-  template< class... Args >
-  ListIterator< T > List< T >::emplace(ConstListIterator< T > it, Args&&... args)
-  {
-    return insert(it, T(std::forward< Args >(args)...));
   }
 }
 #endif

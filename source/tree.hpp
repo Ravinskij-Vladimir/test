@@ -228,98 +228,6 @@ namespace ravinskij
       return fakeroot;
     }
 
-    // template< bool IsConst >
-    // class BaseIterator
-    // {
-    //   template< bool U > friend class BaseIterator;
-    //   template< typename T1, typename T2, class T3 > friend class Tree;
-    //   using val_t = std::conditional_t< IsConst, const std::pair< const Key, T >, std::pair< const Key, T > >;
-    //   using prt_t = std::conditional_t< IsConst, const val_t*, val_t* >;
-    //   using ref_t = std::conditional_t< IsConst, const val_t&, val_t& >;
-    //   using node_t = TreeNode<Key, T>*;
-
-    //   node_t node_;
-    // public:
-    //   using iterator_category = std::bidirectional_iterator_tag;
-    //   using value_type = val_t;
-    //   using difference_type = std::ptrdiff_t;
-    //   using pointer = prt_t;
-    //   using reference = ref_t;
-
-    //   BaseIterator() noexcept:
-    //     node_(nullptr)
-    //   {}
-    //   BaseIterator(const BaseIterator& other) noexcept:
-    //     node_(other.node_)
-    //   {}
-    //   explicit BaseIterator(node_t node) noexcept:
-    //     node_(node)
-    //   {}
-    //   template< bool cond = IsConst, std::enable_if_t< cond, bool > = true >
-    //   BaseIterator(const BaseIterator< !cond >& other) noexcept:
-    //     node_(other.node_)
-    //   {}
-    //   BaseIterator& operator=(const BaseIterator& other) noexcept
-    //   {
-    //     node_ = other.node_;
-    //   }
-    //   BaseIterator& operator++()
-    //   {
-    //     if (node_->right_)
-    //     {
-    //       node_ = node_->right_;
-    //       for (; node_->left_; node_ = node_->left_);
-    //     }
-    //     else
-    //     {
-    //       for (; node_ == node_->parent_->right_; node_ = node_->parent_);
-    //       node_ = node_->parent_;
-    //     }
-    //     return *this;
-    //   }
-    //   BaseIterator operator++(int)
-    //   {
-    //     BaseIterator copy = *this;
-    //     ++(*this);
-    //     return copy;
-    //   }
-    //   BaseIterator& operator--()
-    //   {
-    //     if (node_->left_)
-    //     {
-    //       node_ = node_->left_;
-    //       for (; node_->right_; node_ = node_->right_);
-    //     }
-    //     else
-    //     {
-    //       for (; node_ == node_->parent_->left_; node_ = node_->parent_);
-    //       node_ = node_->parent_;
-    //     }
-    //     return *this;
-    //   }
-    //   BaseIterator operator--(int)
-    //   {
-    //     BaseIterator copy = *this;
-    //     --(*this);
-    //     return copy;
-    //   }
-    //   ref_t operator*() const
-    //   {
-    //     return node_->val_;
-    //   }
-    //   prt_t operator->() const
-    //   {
-    //     return std::addressof(node_->val_);
-    //   }
-    //   bool operator!=(const BaseIterator& other) const noexcept
-    //   {
-    //     return node_ != other.node_;
-    //   }
-    //   bool operator==(const BaseIterator& other) const noexcept
-    //   {
-    //     return node_ == other.node_;
-    //   }
-    // };
   public:
     using iterator = TreeIterator< Key, T, Compare >;
     using const_iterator = ConstTreeIterator< Key, T, Compare >;
@@ -520,7 +428,7 @@ namespace ravinskij
       {
         return cur->second;
       }
-      //TreeNode<Key, T>* added = addNode(fakeroot_, cur, key, T{});
+      
       iterator added = insert({key, T()}).first;
       ++size_;
       return added->second;
@@ -555,10 +463,7 @@ namespace ravinskij
       ++size_;
       return std::make_pair(iterator(added), true);
     }
-    // iterator insert(const_iterator pos, const val_t& val)
-    // {
-    //   return emplace_hint(pos, val);
-    // }
+    
     template< class InputIt >
     void insert(InputIt first, InputIt last)
     {
