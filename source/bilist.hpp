@@ -123,6 +123,33 @@ namespace ravinskij
     rhs.tail_ = nullptr;
     rhs.size_ = 0;
   }
+
+  template< class T >
+  List< T >& List< T >::operator=(List< T >&& rhs)
+  {
+    if (this != std::addressof(rhs))
+    {
+      clear();
+      swap(rhs);
+    }
+    return *this;
+  }
+  template< class T >
+  List< T >& List< T >::operator=(const List< T >& rhs)
+  {
+    if (std::addressof(rhs) != this)
+    {
+      List< T > temp(rhs);
+      swap(temp);
+    }
+    return *this;
+  }
+  template< class T >
+  List< T >::~List()
+  {
+    clear();
+  }
+
   template< class T >
   bool List< T >::operator<(const List< T >& rhs) const
   {
@@ -177,31 +204,7 @@ namespace ravinskij
   {
     return !(rhs == *this);
   }
-  template< class T >
-  List< T >& List< T >::operator=(List< T >&& rhs)
-  {
-    if (this != std::addressof(rhs))
-    {
-      clear();
-      swap(rhs);
-    }
-    return *this;
-  }
-  template< class T >
-  List< T >& List< T >::operator=(const List< T >& rhs)
-  {
-    if (std::addressof(rhs) != this)
-    {
-      List< T > temp(rhs);
-      swap(temp);
-    }
-    return *this;
-  }
-  template< class T >
-  List< T >::~List()
-  {
-    clear();
-  }
+  
   
   
   template< class T >
@@ -445,4 +448,5 @@ namespace ravinskij
     }
   }
 }
+
 #endif
