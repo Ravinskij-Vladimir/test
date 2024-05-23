@@ -1,8 +1,6 @@
 #ifndef COMMANDS_HPP
 #define COMMANDS_HPP
 #include <iosfwd>
-//#include <map>
-//#include <list>
 #include <string>
 #include <vector>
 #include "Node.hpp"
@@ -13,7 +11,6 @@ namespace ravinskij
 {
     void printHelp();
     using traverserTable = Tree<std::string, List<nodePtr>>;
-    //using traverserTable = ravinskij::Tree<std::string, ravinksij::List<ravinskij::Node>>;
     using fileTable = Tree<std::string, std::string>;
     void addText(std::istream&, fileTable&);
     void saveText(std::istream&, fileTable&);
