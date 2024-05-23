@@ -15,10 +15,10 @@ void rav::printHelp()
   std::cout << "Working with encoding and decoding texts from files.\n";
   std::cout << "Example: huffman encode text1 text2 encoding1\n";
   std::cout << "\nWorking with text:\n";
-  std::cout << "\tadd-text\t <text-name> <file>\n"; //\t add text to work with
-  std::cout << "\tsave-text\t <text-name> <file>\n"; //\t write text to the file (content of the file will be overwritten)
-  std::cout << "\tdelete-text\t <text-name>\n"; // \t\t delete text to work with
-  std::cout << "\tprint-text\t <text-name>\n"; // \t\t print the text to the console
+  std::cout << "\tadd-text\t <text-name> <file>\n"; 
+  std::cout << "\tsave-text\t <text-name> <file>\n"; 
+  std::cout << "\tdelete-text\t <text-name>\n"; 
+  std::cout << "\tprint-text\t <text-name>\n"; 
 
   std::cout << "\nEncoding/decoding:\n";
   std::cout << "\tcreate-encoding\t <text-name> <encoding-name>\t\n";
@@ -198,7 +198,6 @@ void rav::addText(std::istream& in, fileTable& files)
   {
     throw std::logic_error("Couldn't open file");
   }
-  //copyFile(input, std::cout);
   files.insert({textName, fileName});
   input.close();
 }
