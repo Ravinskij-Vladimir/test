@@ -1,6 +1,7 @@
 #ifndef NODE_HPP
 #define NODE_HPP
 #include <cstddef>
+#include "shared_ptr.hpp"
 
 namespace ravinskij
 {

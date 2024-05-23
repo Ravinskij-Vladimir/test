@@ -81,7 +81,7 @@ void buildHuffmanTree(rav::List<rav::Node *> &lst, const rav::Tree<char, int> &a
 {
   for (auto itr = alphabet.cbegin(); itr != alphabet.cend(); ++itr)
   {
-    rav::Node *p = new rav::Node;
+    rav::Node *p = new rav::Node{};
     p->symbol = itr->first;
     p->frequency = itr->second;
     lst.push_back(p);
@@ -104,6 +104,11 @@ void buildHuffmanTree(rav::List<rav::Node *> &lst, const rav::Tree<char, int> &a
 
 void buildTable(rav::Node *root, std::vector<bool> &code, rav::encodeMap &table)
 {
+
+  if (root== nullptr)
+  {
+    throw std::logic_error("empty pointer");
+  }
   if (root->left != nullptr)
   {
     code.push_back(0);
@@ -275,13 +280,17 @@ void rav::createEncoding(std::istream& in, encodesTable& encodings, traverserTab
   readAlphabet(input, alphabet);
   rav::List<rav::Node*> tree;
   buildHuffmanTree(tree, alphabet, rav::NodeComparator());
-  std::pair< std::string, rav::List< rav::Node *>> item;
-  item.first = encodingName;
-  item.second = std::move(tree);
-  traverses.insert(item);
+  // std::pair< std::string, rav::List< rav::Node *>> item;
+  // item.first = encodingName;
+  // item.second = tree;
+  traverses.insert(std::make_pair(encodingName, tree));
+  if (tree.empty())
+  {
+    throw std::logic_error("Empty tree");
+  }
   rav::Node* root = tree.front();
   std::vector<bool> code;
-  buildTable(root, code, encodings.at(encodingName));
+  buildTable(root, code, encodings[encodingName]);
 }
 
 void rav::deleteEncoding(std::istream& in, encodesTable& encodings, traverserTable& traverses)
