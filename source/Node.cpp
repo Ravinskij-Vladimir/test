@@ -12,5 +12,5 @@ rav::Node::Node(const memberPtr& leftNode, const memberPtr& rightNode) :
 
 bool rav::NodeComparator::operator()(const memberPtr& lhs, const memberPtr& rhs) const
 {
-    return lhs->frequency < rhs->frequency;
+    return lhs->frequency > rhs->frequency;
 }

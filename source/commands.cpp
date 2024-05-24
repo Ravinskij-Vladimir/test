@@ -90,6 +90,7 @@ void buildHuffmanTree(rav::List<rav::nodePtr> &lst, const rav::Tree<char, int> &
   //////  создаем дерево
   while (lst.size() != 1)
   {
+    lst.sort(comp);
     rav::nodePtr leftChild = lst.front();
     lst.pop_front();
     rav::nodePtr rightChild = lst.front();
