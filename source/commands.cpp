@@ -8,6 +8,8 @@
 #include "scopeGuard.hpp"
 
 namespace rav = ravinskij;
+//using Node = rav::Node;
+//using nodePtr = std::shared_ptr<rav::Node>;
 
 void rav::printHelp()
 {
@@ -15,10 +17,10 @@ void rav::printHelp()
   std::cout << "Working with encoding and decoding texts from files.\n";
   std::cout << "Example: huffman encode text1 text2 encoding1\n";
   std::cout << "\nWorking with text:\n";
-  std::cout << "\tadd-text\t <text-name> <file>\n"; 
-  std::cout << "\tsave-text\t <text-name> <file>\n"; 
-  std::cout << "\tdelete-text\t <text-name>\n"; 
-  std::cout << "\tprint-text\t <text-name>\n"; 
+  std::cout << "\tadd-text\t <text-name> <file>\n"; //\t add text to work with
+  std::cout << "\tsave-text\t <text-name> <file>\n"; //\t write text to the file (content of the file will be overwritten)
+  std::cout << "\tdelete-text\t <text-name>\n"; // \t\t delete text to work with
+  std::cout << "\tprint-text\t <text-name>\n"; // \t\t print the text to the console
 
   std::cout << "\nEncoding/decoding:\n";
   std::cout << "\tcreate-encoding\t <text-name> <encoding-name>\t\n";
@@ -48,6 +50,13 @@ void rav::printHelp()
   std::cout << "(for the source text, the text name is displayed instead of the encoding).\n";
 }
 
+
+std::ifstream::pos_type getFileSize(const std::string filename)
+{
+    std::ifstream in(filename, std::ios::ate | std::ios::binary);
+    return in.tellg(); 
+}
+
 constexpr int bitsInByte()
 {
   return 8;
@@ -63,11 +72,14 @@ void readAlphabet(std::istream &input, rav::Tree<char, int> &alphabet)
     input >> c;
     alphabet[c]++;
   }
+
+  input.clear();
+  input.seekg(0); // перемещаем указатель снова в начало файла
 }
 
 void buildHuffmanTree(rav::List<rav::nodePtr> &lst, const rav::Tree<char, int> &alphabet, rav::NodeComparator comp)
 {
-  for (auto itr = alphabet.cbegin(); itr != alphabet.cend(); ++itr)
+  for (auto itr = alphabet.cbegin(); itr != alphabet.end(); ++itr)
   {
     rav::nodePtr p = std::make_shared<rav::Node>();
     p->symbol = itr->first;
@@ -75,6 +87,7 @@ void buildHuffmanTree(rav::List<rav::nodePtr> &lst, const rav::Tree<char, int> &
     lst.push_back(p);
   }
 
+  //////  создаем дерево
   while (lst.size() != 1)
   {
     lst.sort(comp);
@@ -91,11 +104,6 @@ void buildHuffmanTree(rav::List<rav::nodePtr> &lst, const rav::Tree<char, int> &
 
 void buildTable(rav::nodePtr root, std::vector<bool> &code, rav::encodeMap &table)
 {
-
-  if (root== nullptr)
-  {
-    throw std::logic_error("empty pointer");
-  }
   if (root->left != nullptr)
   {
     code.push_back(0);
@@ -118,22 +126,14 @@ void encodeAndWrite(const rav::encodeMap &table, std::istream &input, std::ostre
 {
   int position = 0;
   char buf = 0;
-  rav::ScopeGuard guard(input);
-  input >> std::noskipws;
   while (!input.eof())
   {
-    char c = 0;
-    input >> c;
-    std::vector<bool> x;
-    try 
+    char c = input.get();
+    if (c == EOF)
     {
-      x = table.at(c);
+      break;
     }
-    catch (const std::out_of_range&)
-    {
-      std::cout << "at() is broken";
-      throw;
-    }
+    std::vector<bool> x = table.at(c);
     for (size_t n = 0; n < x.size(); n++)
     {
       buf = buf | x[n] << (bitsInByte() - 1 - position);
@@ -151,10 +151,12 @@ void encodeAndWrite(const rav::encodeMap &table, std::istream &input, std::ostre
 void decodeAndWrite(const rav::List<rav::nodePtr>& travers, std::istream &input, std::ostream &output)
 {
   rav::nodePtr root = travers.front();
-  rav::nodePtr traverser =root;
+  rav::nodePtr traverser = root;
   int position = 0;
-  char byte;
-  byte = input.get();
+  char byte = 0;
+  rav::ScopeGuard guard(input);
+  input >> std::noskipws;
+  input >> byte;
   while (!input.eof())
   {
     bool checkedBitState = byte & (1 << (bitsInByte() - 1 - position));
@@ -171,7 +173,7 @@ void decodeAndWrite(const rav::List<rav::nodePtr>& travers, std::istream &input,
     if (position == bitsInByte())
     {
       position = 0;
-      byte = input.get();
+      input >> byte;
     }
   }
   output << '\n';
@@ -202,8 +204,13 @@ void rav::addText(std::istream& in, fileTable& files)
   {
     throw std::logic_error("Couldn't open file");
   }
+  //copyFile(input, std::cout);
   files.insert({textName, fileName});
   input.close();
+  // for (auto it = files.cbegin(); it != files.end(); it++)
+  // {
+  //   std::cout << it->first << ' ' << it->second << '\n';
+  // }
 }
 
 void rav::saveText(std::istream& in, fileTable& files)
@@ -240,7 +247,7 @@ void rav::printText(std::istream& in, std::ostream& out, const fileTable& files)
 {
   std::string textName;
   in >> textName;
-  if (files.find(textName) == files.cend())
+  if (files.find(textName) == files.end())
   {
     throw std::logic_error("Requested text is not found");
   }
@@ -266,16 +273,13 @@ void rav::createEncoding(std::istream& in, encodesTable& encodings, traverserTab
   {
     throw std::logic_error("Couldn't open file");
   }
+
   rav::Tree<char, int> alphabet;
   readAlphabet(input, alphabet);
-  rav::List<rav::nodePtr> tree;
+  rav::List<nodePtr> tree;
   buildHuffmanTree(tree, alphabet, rav::NodeComparator());
   traverses.insert({encodingName, tree});
-  if (tree.empty())
-  {
-    throw std::logic_error("Empty tree");
-  }
-  rav::nodePtr root = tree.front();
+  nodePtr root = tree.front();
   std::vector<bool> code;
   buildTable(root, code, encodings[encodingName]);
 }
@@ -297,7 +301,7 @@ void rav::encode(std::istream& in, const encodesTable& encodings, fileTable& fil
   std::string textName, encodedName, encodingName;
   in >> textName >> encodedName >> encodingName;
 
-  if (encodings.find(encodingName) == encodings.cend())
+  if (encodings.find(encodingName) == encodings.end())
   {
     throw std::logic_error("No such encoding is provided");
   }
@@ -328,7 +332,7 @@ void rav::decode(std::istream& in, const traverserTable& traverses, fileTable& f
   {
     throw std::logic_error("Names collision has occured");
   }
-  if (traverses.find(encodingName) == traverses.cend())
+  if (traverses.find(encodingName) == traverses.end())
   {
     throw std::logic_error("No such encoding is provided");
   }
