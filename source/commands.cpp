@@ -118,14 +118,22 @@ void encodeAndWrite(const rav::encodeMap &table, std::istream &input, std::ostre
 {
   int position = 0;
   char buf = 0;
+  rav::ScopeGuard guard(input);
+  input >> std::noskipws;
   while (!input.eof())
   {
-    char c = input.get();
-    if (c == EOF)
+    char c = 0;
+    input >> c;
+    std::vector<bool> x;
+    try 
     {
-      break;
+      x = table.at(c);
     }
-    std::vector<bool> x = table.at(c);
+    catch (const std::out_of_range&)
+    {
+      std::cout << "at() is broken";
+      throw;
+    }
     for (size_t n = 0; n < x.size(); n++)
     {
       buf = buf | x[n] << (bitsInByte() - 1 - position);
