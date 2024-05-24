@@ -41,12 +41,12 @@ namespace ravinskij
     ListIterator< T > end() noexcept;
     ConstListIterator< T > cbegin() const noexcept;
     ConstListIterator< T > cend() const noexcept;
-    ConstListIterator< T > erase(ConstListIterator< T > it);
-    ListIterator< T > insert(ConstListIterator< T > it, const T& value);
+    ListIterator< T > erase(ListIterator< T > it);
+    ListIterator< T > insert(ListIterator< T > it, const T& value);
     template< class Iterator >
-    ListIterator< T > insert(ConstListIterator< T > it, Iterator start, Iterator finish);
-    ListIterator< T > insert(ConstListIterator< T > it, size_t n, const T& value);
-    ListIterator< T > insert(ConstListIterator< T > it, std::initializer_list< T > il);
+    ListIterator< T > insert(ListIterator< T > it, Iterator start, Iterator finish);
+    ListIterator< T > insert(ListIterator< T > it, size_t n, const T& value);
+    ListIterator< T > insert(ListIterator< T > it, std::initializer_list< T > il);
     bool empty() const noexcept;
     void push_front(const T& value);
     void push_back(const T& value);
@@ -260,9 +260,9 @@ namespace ravinskij
     return ConstListIterator< T >(const_cast< ListNode< T >* >(std::addressof(imaginary_node_)));
   }
   template< class T >
-  ConstListIterator< T > List< T >::erase(ConstListIterator< T > it)
+  ListIterator< T > List< T >::erase(ListIterator< T > it)
   {
-    ConstListIterator< T > result(it.node->next_);
+    ListIterator< T > result(it.node->next_);
     it.node->next_->prev_ = it.node->prev_;
     if (it.node == head_)
     {
@@ -282,7 +282,7 @@ namespace ravinskij
     return result;
   }
   template< class T >
-  ListIterator< T > List< T >::insert(ConstListIterator< T > it, const T& value)
+  ListIterator< T > List< T >::insert(ListIterator< T > it, const T& value)
   {
     if (size_ == 0)
     {
@@ -315,9 +315,9 @@ namespace ravinskij
   }
   template< class T >
   template< class Iterator >
-  ListIterator< T > List< T >::insert(ConstListIterator< T > it, Iterator start, Iterator finish)
+  ListIterator< T > List< T >::insert(ListIterator< T > it, Iterator start, Iterator finish)
   {
-    ConstListIterator< T > iterator(it);
+    ListIterator< T > iterator(it);
     size_t count = 0;
     try
     {
@@ -339,9 +339,9 @@ namespace ravinskij
     }
   }
   template< class T >
-  ListIterator< T > List< T >::insert(ConstListIterator< T > it, size_t n, const T& value)
+  ListIterator< T > List< T >::insert(ListIterator< T > it, size_t n, const T& value)
   {
-    ConstListIterator< T > iterator(it);
+    ListIterator< T > iterator(it);
     size_t count = 0;
     try
     {
@@ -364,7 +364,7 @@ namespace ravinskij
     }
   }
   template< class T >
-  ListIterator< T > List< T >::insert(ConstListIterator< T > it, std::initializer_list< T > il)
+  ListIterator< T > List< T >::insert(ListIterator< T > it, std::initializer_list< T > il)
   {
     return insert(it, il.begin(), il.end());
   }
@@ -376,7 +376,7 @@ namespace ravinskij
   template< class T >
   void List< T >::push_front(const T& value)
   {
-    insert(cbegin(), value);
+    insert(begin(), value);
   }
   template< class T >
   void List< T >::push_back(const T& value)
@@ -387,18 +387,18 @@ namespace ravinskij
     }
     else
     {
-      insert(cend(), value);
+      insert(end(), value);
     }
   }
   template< class T >
   void List< T >::pop_back()
   {
-    erase(--cend());
+    erase(--end());
   }
   template< class T >
   void List< T >::pop_front()
   {
-    erase(cbegin());
+    erase(begin());
   }
   template< class T >
   void List< T >::clear() noexcept
