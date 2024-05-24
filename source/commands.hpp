@@ -6,6 +6,7 @@
 #include "Node.hpp"
 #include "tree.hpp"
 #include "bilist.hpp"
+#include "codeWrappers.hpp"
 
 namespace ravinskij
 {
@@ -23,6 +24,8 @@ namespace ravinskij
     void deleteEncoding(std::istream&, encodesTable&, traverserTable&);
     void encode(std::istream&, const encodesTable&, fileTable&);
     void decode(std::istream&, const traverserTable&, fileTable&);
+    void addEncoding(std::istream&, encodesTable&);
+    void saveEncoding(std::istream&, encodesTable&);
 }
 
 #endif

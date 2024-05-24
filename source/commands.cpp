@@ -146,6 +146,7 @@ void encodeAndWrite(const rav::encodeMap &table, std::istream &input, std::ostre
       }
     }
   }
+  output << buf;
 }
 
 void decodeAndWrite(const rav::List<rav::nodePtr>& travers, std::istream &input, std::ostream &output)
@@ -345,4 +346,51 @@ void rav::decode(std::istream& in, const traverserTable& traverses, fileTable& f
   rav::List<rav::nodePtr> traverser = traverses.find(encodingName)->second;
   decodeAndWrite(traverser, input, output);
   files.insert({decodedName, decodedName});
+}
+
+
+void rav::addEncoding(std::istream& in, encodesTable& encodings)
+{
+  std::string encodingName, fileName;
+  in >> encodingName >> fileName;
+  if (encodings.find(encodingName) != encodings.end())
+  {
+    throw std::logic_error("Such encoding already exists");
+  }
+  std::ifstream input(fileName);
+  if (!input.is_open())
+  {
+    throw std::logic_error("Couldn't open file");
+  }
+  //input >> encodingName;
+  rav::encodeMap map;
+  while (!input.eof())
+  {
+    char ch = 0;
+    std::vector<bool> code;
+    input >> ReadWrapper{ch, code};
+    std::cout << WriteWrapper{ch, code} <<  '\n';
+    map.insert({ch, code});
+  }
+  encodings.insert({encodingName, map});
+}
+
+void rav::saveEncoding(std::istream& in, encodesTable& encodings)
+{
+  std::string encodingName, fileName;
+  in >> encodingName >> fileName;
+  auto currEncoding = encodings.find(encodingName);
+  if (currEncoding == encodings.end())
+  {
+    throw std::logic_error("No such encoding is provided");
+  }
+  std::ofstream output(fileName);
+  auto beginIt = currEncoding->second.cbegin();
+  auto endIt = currEncoding->second.end();
+  output << WriteWrapper{beginIt->first, beginIt->second};
+  ++beginIt;
+  for (auto it = beginIt; it != endIt; ++it)
+  {
+    output << '\n' << WriteWrapper{it->first, it->second};
+  }
 }
