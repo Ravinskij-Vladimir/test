@@ -12,7 +12,7 @@ namespace ravinskij
     void printHelp();
     using traverserTable = Tree<std::string, List<nodePtr>>;
     using fileTable = Tree<std::string, std::string>;
-    void addText(std::istream&, fileTable&);
+    void addText(std::istream&, fileTable&); 
     void saveText(std::istream&, fileTable&);
     void deleteText(std::istream&, fileTable&);
     void printText(std::istream&, std::ostream&, const fileTable&);

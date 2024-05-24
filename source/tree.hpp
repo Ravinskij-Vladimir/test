@@ -160,8 +160,7 @@ namespace ravinskij
       std::swap(size_, other.size_);
     }
 
-    template< typename K>
-    iterator find(const K& x)
+    iterator find(const Key& x)
     {
       TreeNode<Key, T>* cur = fakeroot_->left_;
       while (cur)
@@ -175,10 +174,9 @@ namespace ravinskij
       return end();
     }
 
-    template< class K >
-    constIterator find(const K& x) const
+    constIterator find(const Key& x) const
     {
-      TreeNode<Key, T>* cur = fakeroot_.left_;
+      TreeNode<Key, T>* cur = fakeroot_->left_;
       while (cur)
       {
         if (cur->val_.first == x)
@@ -196,19 +194,6 @@ namespace ravinskij
       return (find(x) != end());
     }
     
-    constIterator find(const Key& key) const
-    {
-      TreeNode<Key, T>* cur = fakeroot_->left_;
-      while (cur)
-      {
-        if (cur->val_.first == key)
-        {
-          return constIterator(cur);
-        }
-        cur = (comparator_(cur->val_.first, key)) ? cur->right_ : cur->left_;
-      }
-      return cend();
-    }
 
     T& operator[](const Key& key)
     {
@@ -241,6 +226,7 @@ namespace ravinskij
       }
       throw std::out_of_range("No such element");
     }
+
     std::pair< iterator, bool > insert(const val_t& val)
     {
       TreeNode<Key, T>* hint = findHint(fakeroot_, val.first);

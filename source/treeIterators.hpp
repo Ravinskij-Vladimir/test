@@ -130,8 +130,8 @@ namespace ravinskij
       return node_->val_;
     }
   private:
-    TreeNode< Key, T >* node_;
-    explicit ConstTreeIterator(TreeNode< Key, T >* node):
+    const TreeNode< Key, T >* node_;
+    explicit ConstTreeIterator(const TreeNode< Key, T >* node):
       node_(node)
     {}
   };
