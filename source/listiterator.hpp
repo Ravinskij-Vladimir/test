@@ -81,6 +81,9 @@ namespace ravinskij
     {}
     ConstListIterator(const ConstListIterator< T >&) = default;
     ConstListIterator< T >& operator=(const ConstListIterator< T >&) = default;
+    explicit ConstListIterator(ListNode< T >* nd):
+      node(nd)
+    {}
     ~ConstListIterator() = default;
     ConstListIterator< T >& operator++()
     {
@@ -122,9 +125,7 @@ namespace ravinskij
     }
   private:
     ListNode< T >* node;
-    explicit ConstListIterator(ListNode< T >* nd):
-      node(nd)
-    {}
+   
   };
 }
 #endif

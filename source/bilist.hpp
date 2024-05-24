@@ -281,6 +281,7 @@ namespace ravinskij
     --size_;
     return result;
   }
+
   template< class T >
   ListIterator< T > List< T >::insert(ListIterator< T > it, const T& value)
   {
