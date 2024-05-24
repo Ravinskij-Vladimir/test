@@ -79,7 +79,7 @@ void readAlphabet(std::istream &input, rav::Tree<char, int> &alphabet)
 
 void buildHuffmanTree(rav::List<rav::nodePtr> &lst, const rav::Tree<char, int> &alphabet, rav::NodeComparator comp)
 {
-  for (auto itr = alphabet.cbegin(); itr != alphabet.end(); ++itr)
+  for (auto itr = alphabet.begin(); itr != alphabet.end(); ++itr)
   {
     rav::nodePtr p = std::make_shared<rav::Node>();
     p->symbol = itr->first;
@@ -90,8 +90,6 @@ void buildHuffmanTree(rav::List<rav::nodePtr> &lst, const rav::Tree<char, int> &
   //////  создаем дерево
   while (lst.size() != 1)
   {
-    lst.sort(comp);
-
     rav::nodePtr leftChild = lst.front();
     lst.pop_front();
     rav::nodePtr rightChild = lst.front();
@@ -146,7 +144,10 @@ void encodeAndWrite(const rav::encodeMap &table, std::istream &input, std::ostre
       }
     }
   }
-  output << buf;
+  if (position != 0)
+  {
+    output << buf;
+  }
 }
 
 void decodeAndWrite(const rav::List<rav::nodePtr>& travers, std::istream &input, std::ostream &output)
