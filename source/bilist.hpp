@@ -42,7 +42,6 @@ namespace ravinskij
     ConstListIterator< T > cbegin() const noexcept;
     ConstListIterator< T > cend() const noexcept;
     ConstListIterator< T > erase(ConstListIterator< T > it);
-    ConstListIterator< T > erase(ConstListIterator< T > it_start, ConstListIterator< T > it_finish);
     ListIterator< T > insert(ConstListIterator< T > it, const T& value);
     template< class Iterator >
     ListIterator< T > insert(ConstListIterator< T > it, Iterator start, Iterator finish);
@@ -281,15 +280,6 @@ namespace ravinskij
     delete it.node;
     --size_;
     return result;
-  }
-  template< class T >
-  ConstListIterator< T > List< T >::erase(ConstListIterator< T > it_start, ConstListIterator< T > it_finish)
-  {
-    while (it_start != it_finish)
-    {
-      erase(it_start++);
-    }
-    return it_finish;
   }
   template< class T >
   ListIterator< T > List< T >::insert(ConstListIterator< T > it, const T& value)

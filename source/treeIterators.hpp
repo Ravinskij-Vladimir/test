@@ -39,34 +39,10 @@ namespace ravinskij
       node_ = node_->parent_;
       return *this;
     }
-    TreeIterator< Key, T, Compare >& operator--()
-    {
-      if (node_->left_)
-      {
-        node_ = node_->left_;
-        while (node_->right_)
-        {
-          node_ = node_->right_;
-        }
-        return *this;
-      }
-      while (node_->parent_ && node_->parent_->left_ == node_)
-      {
-        node_ = node_->parent_;
-      }
-      node_ = node_->parent_;
-      return *this;
-    }
     TreeIterator< Key, T, Compare > operator++(int)
     {
       TreeIterator< Key, T, Compare > result(*this);
       ++(*this);
-      return result;
-    }
-    TreeIterator< Key, T, Compare > operator--(int)
-    {
-      TreeIterator< Key, T, Compare > result(*this);
-      --(*this);
       return result;
     }
     bool operator==(const TreeIterator< Key, T, Compare >& rhs) const
@@ -131,34 +107,10 @@ namespace ravinskij
       node_ = node_->parent_;
       return *this;
     }
-    ConstTreeIterator< Key, T, Compare >& operator--()
-    {
-      if (node_->left_)
-      {
-        node_ = node_->left_;
-        while (node_->right_)
-        {
-          node_ = node_->right_;
-        }
-        return *this;
-      }
-      while (node_->parent_ && node_->parent_->left_ == node_)
-      {
-        node_ = node_->parent_;
-      }
-      node_ = node_->parent_;
-      return *this;
-    }
     ConstTreeIterator< Key, T, Compare > operator++(int)
     {
       ConstTreeIterator< Key, T, Compare > result(*this);
       ++(*this);
-      return result;
-    }
-    ConstTreeIterator< Key, T, Compare > operator--(int)
-    {
-      ConstTreeIterator< Key, T, Compare > result(*this);
-      --(*this);
       return result;
     }
     bool operator==(const ConstTreeIterator< Key, T, Compare >& rhs) const
