@@ -183,7 +183,6 @@ void decodeAndWrite(const rav::List<rav::nodePtr>& travers, std::istream &input,
       input >> byte;
     }
   }
-  output << '\n';
 }
 
 void copyFile(std::ifstream& in, std::ostream& out)
@@ -235,8 +234,8 @@ void rav::saveText(std::istream& in, fileTable& files)
     throw std::logic_error("Couldn't open file");
   }
   copyFile(input, output);
-  input.close();
-  output.close();
+  // input.close();
+  // output.close();
 }
 
 void rav::deleteText(std::istream& in, fileTable& files)
