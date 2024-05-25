@@ -101,7 +101,7 @@ void buildHuffmanTree(rav::List<rav::nodePtr> &lst, const rav::Tree<char, int> &
   }
 }
 
-void buildTable(rav::nodePtr root, std::vector<bool> &code, rav::encodeMap &table)
+void buildTable(rav::nodePtr root, rav::boolVec &code, rav::encodeMap &table)
 {
   if (root->left != rav::nodePtr())
   {
@@ -132,7 +132,7 @@ void encodeAndWrite(const rav::encodeMap &table, std::istream &input, std::ostre
     {
       break;
     }
-    std::vector<bool> x = table.at(c);
+    rav::boolVec x = table.at(c);
     for (size_t n = 0; n < x.size(); n++)
     {
       buf = buf | x[n] << (bitsInByte() - 1 - position);
@@ -164,9 +164,13 @@ void decodeAndWrite(const rav::List<rav::nodePtr>& travers, std::istream &input,
   {
     bool checkedBitState = byte & (1 << (bitsInByte() - 1 - position));
     if (checkedBitState)
+    {
       traverser = traverser->right;
+    }
     else
+    {
       traverser = traverser->left;
+    }
     if (traverser->left == rav::nodePtr() && traverser->right == rav::nodePtr())
     {
       output << traverser->symbol;
@@ -283,7 +287,7 @@ void rav::createEncoding(std::istream& in, encodesTable& encodings, traverserTab
   buildHuffmanTree(tree, alphabet, rav::NodeComparator());
   traverses.insert({encodingName, tree});
   nodePtr root = tree.front();
-  std::vector<bool> code;
+  boolVec code;
   buildTable(root, code, encodings[encodingName]);
 }
 
@@ -369,7 +373,7 @@ void rav::addEncoding(std::istream& in, encodesTable& encodings)
   while (!input.eof())
   {
     char ch = 0;
-    std::vector<bool> code;
+    boolVec code;
     input >> ReadWrapper{ch, code};
     std::cout << WriteWrapper{ch, code} <<  '\n';
     map.insert({ch, code});

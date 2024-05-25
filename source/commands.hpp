@@ -3,6 +3,7 @@
 #include <iosfwd>
 #include <string>
 #include <vector>
+//#include "boolArray.hpp"
 #include "Node.hpp"
 #include "tree.hpp"
 #include "bilist.hpp"
@@ -18,7 +19,8 @@ namespace ravinskij
     void deleteText(std::istream&, fileTable&);
     void printText(std::istream&, std::ostream&, const fileTable&);
 
-    using encodeMap = Tree<char, std::vector<bool>>;
+    using boolVec = std::vector<bool>;
+    using encodeMap = Tree<char, boolVec>;
     using encodesTable = Tree<std::string, encodeMap>;
     void createEncoding(std::istream&, encodesTable&, traverserTable&, const fileTable&);
     void deleteEncoding(std::istream&, encodesTable&, traverserTable&);

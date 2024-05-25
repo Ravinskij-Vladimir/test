@@ -13,9 +13,9 @@ std::ostream& rav::operator<<(std::ostream& out, rav::WriteWrapper&& wrapper)
     }
     
     out << '"' << wrapper.symbol << '"' << '-';
-    for (bool bit: wrapper.code)
+    for (size_t i = 0; i < wrapper.code.size(); ++i)
     {
-        out << bit;
+        out << wrapper.code[i];
     }
     return out;
 }
