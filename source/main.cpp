@@ -64,12 +64,12 @@ int main(int argc, char* argv[])
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
   }
-  for (auto it = traverses.begin(); it != traverses.end(); ++it)
-  {
-    for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it)
-    {
-      delete *it2;
-    }
-  }
+  // for (auto it = traverses.begin(); it != traverses.end(); ++it)
+  // {
+  //   for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it)
+  //   {
+  //     delete *it2;
+  //   }
+  // }
   return 0;
 }

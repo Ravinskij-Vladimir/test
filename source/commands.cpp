@@ -91,7 +91,7 @@ void buildHuffmanTree(rav::List<rav::nodePtr> &lst, const rav::Tree<char, int> &
   while (lst.size() != 1)
   {
     lst.sort(comp);
-    rav::nodePtr leftChild = rav::make_pointer<rav::Node>(lst.front());
+    rav::nodePtr leftChild = lst.front();
     lst.pop_front();
     rav::nodePtr rightChild = lst.front();
     lst.pop_front();
@@ -103,19 +103,19 @@ void buildHuffmanTree(rav::List<rav::nodePtr> &lst, const rav::Tree<char, int> &
 
 void buildTable(rav::nodePtr root, std::vector<bool> &code, rav::encodeMap &table)
 {
-  if (root->left != nullptr)
+  if (root->left != rav::nodePtr())
   {
     code.push_back(0);
     buildTable(root->left, code, table);
   }
 
-  if (root->right != nullptr)
+  if (root->right != rav::nodePtr())
   {
     code.push_back(1);
     buildTable(root->right, code, table);
   }
 
-  if (root->left == nullptr && root->right == nullptr)
+  if (root->left == rav::nodePtr() && root->right == rav::nodePtr())
     table[root->symbol] = code;
 
   code.pop_back();
@@ -167,7 +167,7 @@ void decodeAndWrite(const rav::List<rav::nodePtr>& travers, std::istream &input,
       traverser = traverser->right;
     else
       traverser = traverser->left;
-    if (traverser->left == nullptr && traverser->right == nullptr)
+    if (traverser->left == rav::nodePtr() && traverser->right == rav::nodePtr())
     {
       output << traverser->symbol;
       traverser = root;

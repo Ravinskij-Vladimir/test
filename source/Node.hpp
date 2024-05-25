@@ -22,7 +22,7 @@ namespace ravinskij
     Node &operator=(Node &&) = default;
     ~Node() = default;
 
-    Node(const memberPtr& leftNode, const memberPtr& rightNode);
+    Node(memberPtr& leftNode, memberPtr& rightNode);
   private:  
   };
   

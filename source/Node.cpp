@@ -1,7 +1,7 @@
 #include "Node.hpp"
 #include <utility>
 namespace rav = ravinskij;
-rav::Node::Node(const memberPtr& leftNode, const memberPtr& rightNode) :
+rav::Node::Node(memberPtr& leftNode, memberPtr& rightNode) :
     frequency(0),
     symbol(0),
     left(leftNode),
