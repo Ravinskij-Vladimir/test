@@ -57,6 +57,7 @@ namespace ravinskij
             }
             std::swap(value_, ptr.value_);
             std::swap(counter_, ptr.counter_);
+            return *this;
         }
         
         ~SmartPointer()

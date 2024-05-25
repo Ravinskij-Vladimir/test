@@ -116,7 +116,8 @@ namespace ravinskij
             acquire(static_cast<typename shared_ptr<T>::element_type *>(ptr.get()));
         }
 
-        shared_ptr(const shared_ptr &ptr) noexcept : shared_ptr_base(ptr)
+        shared_ptr(const shared_ptr &ptr) noexcept : 
+            shared_ptr_base(ptr)
         {
             assert((nullptr == ptr.px) || (0 != ptr.pn.useCount()));
             acquire(ptr.px);
