@@ -8,15 +8,15 @@
 namespace ravinskij
 {
     template <class T>
-    class SmartPointer
+    class SharedPointer
     {
     public:
-        SmartPointer():
+        SharedPointer():
             value_(nullptr),
             counter_(nullptr)
         {}
 
-        SmartPointer(const SmartPointer &ptr):
+        SharedPointer(const SharedPointer &ptr):
             value_(ptr.value_),
             counter_(ptr.counter_)
         {
@@ -26,7 +26,7 @@ namespace ravinskij
             }
         }
 
-        SmartPointer(SmartPointer &&ptr):
+        SharedPointer(SharedPointer &&ptr):
             value_(ptr.value_),
             counter_(ptr.counter_)
         {
@@ -34,18 +34,18 @@ namespace ravinskij
             ptr.counter_ = nullptr;
         }    
 
-        explicit SmartPointer(T *value):
+        explicit SharedPointer(T *value):
             value_(value),
             counter_(new size_t(1))
         {}
 
-        SmartPointer &operator=(const SmartPointer &ptr)
+        SharedPointer &operator=(const SharedPointer &ptr)
         {
             if (this == std::addressof(ptr))
             {
                 return *this;
             }
-            SmartPointer temp(ptr);
+            SharedPointer temp(ptr);
             if (ptr.value_)
             {
                 --*counter_;
@@ -55,7 +55,7 @@ namespace ravinskij
             return *this;
         }
         
-        SmartPointer &operator=(SmartPointer &&ptr)
+        SharedPointer &operator=(SharedPointer &&ptr)
         {
             if (this == std::addressof(ptr))
             {
@@ -66,7 +66,7 @@ namespace ravinskij
             return *this;
         }
         
-        ~SmartPointer()
+        ~SharedPointer()
         {
             if (value_ != nullptr)
             {
@@ -108,12 +108,12 @@ namespace ravinskij
             return value_ != nullptr;
         }
 
-        bool operator==(const SmartPointer& rhs) const noexcept
+        bool operator==(const SharedPointer& rhs) const noexcept
         {
             return value_ == rhs.value_;
         }
 
-        bool operator!=(const SmartPointer& rhs) const noexcept
+        bool operator!=(const SharedPointer& rhs) const noexcept
         {
             return !(*this == rhs);
         }
@@ -129,9 +129,9 @@ namespace ravinskij
     };
 
     template <class T, class... Args>
-    SmartPointer<T> make_pointer(Args &&...args)
+    SharedPointer<T> make_shared(Args &&...args)
     {
-        return SmartPointer<T>(new T(std::forward<Args>(args)...));
+        return SharedPointer<T>(new T(std::forward<Args>(args)...));
     }
 
 }

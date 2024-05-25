@@ -81,7 +81,7 @@ void buildHuffmanTree(rav::List<rav::nodePtr> &lst, const rav::Tree<char, int> &
 {
   for (auto itr = alphabet.begin(); itr != alphabet.end(); ++itr)
   {
-    rav::nodePtr p = rav::make_pointer<rav::Node>();
+    rav::nodePtr p(new rav::Node());
     p->symbol = itr->first;
     p->frequency = itr->second;
     lst.push_back(p);
@@ -96,7 +96,7 @@ void buildHuffmanTree(rav::List<rav::nodePtr> &lst, const rav::Tree<char, int> &
     rav::nodePtr rightChild = lst.front();
     lst.pop_front();
 
-    rav::nodePtr parent = rav::make_pointer<rav::Node>(leftChild, rightChild);
+    rav::nodePtr parent(new rav::Node(leftChild, rightChild));
     lst.push_back(parent);
   }
 }

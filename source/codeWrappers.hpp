@@ -3,20 +3,20 @@
 
 #include <iosfwd>
 #include <vector>
-#include "boolArray.hpp"
+#include "BoolVector.hpp"
 
 namespace ravinskij
 {
   struct ReadWrapper
   {
     char &symbol;
-    std::vector<bool> &code;
+    BoolVector &code;
   };
 
   struct WriteWrapper
   {
     const char &symbol;
-    const std::vector<bool> &code;
+    const BoolVector &code;
   };
   
   std::ostream& operator<<(std::ostream& out, WriteWrapper&& wrapper);

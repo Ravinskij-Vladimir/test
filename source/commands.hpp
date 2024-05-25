@@ -2,8 +2,8 @@
 #define COMMANDS_HPP
 #include <iosfwd>
 #include <string>
-#include <vector>
-//#include "boolArray.hpp"
+//#include <vector>
+#include "BoolVector.hpp"
 #include "Node.hpp"
 #include "tree.hpp"
 #include "bilist.hpp"
@@ -19,7 +19,7 @@ namespace ravinskij
     void deleteText(std::istream&, fileTable&);
     void printText(std::istream&, std::ostream&, const fileTable&);
 
-    using boolVec = std::vector<bool>;
+    using boolVec = BoolVector;
     using encodeMap = Tree<char, boolVec>;
     using encodesTable = Tree<std::string, encodeMap>;
     void createEncoding(std::istream&, encodesTable&, traverserTable&, const fileTable&);
