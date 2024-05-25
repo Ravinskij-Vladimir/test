@@ -1,14 +1,14 @@
 #ifndef NODE_HPP
 #define NODE_HPP
 #include <cstddef>
-#include <memory>
+#include "smartPointer.hpp"
 
 namespace ravinskij
 {
   struct Node;
 
-  using nodePtr = std::shared_ptr<Node>;
-  using memberPtr = std::shared_ptr<Node>;
+  using nodePtr = SmartPointer<Node>;
+  using memberPtr = SmartPointer<Node>;
   struct Node
   {
     size_t frequency;
