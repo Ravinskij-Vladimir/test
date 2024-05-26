@@ -13,23 +13,14 @@ namespace ravinskij
   {
   public:
     List();
-    //List(const T& value, size_t count);
     template< class Iterator >
     List(Iterator start, Iterator finish);
     List(std::initializer_list< T > il);
     List(const List< T >& rhs);
     List(List< T >&& rhs);
-    bool operator<(const List< T >& rhs) const;
-    // bool operator>=(const List< T >& rhs) const;
-    // bool operator<=(const List< T >& rhs) const;
-    // bool operator>(const List< T >& rhs) const;
-    bool operator==(const List< T >& rhs) const;
-    bool operator!=(const List< T >& rhs) const;
     List< T >& operator=(List< T >&& rhs);
     List< T >& operator=(const List< T >& rhs);
     ~List();
-    
-    void remove(const T& value);
   
     void swap(List< T >& list);
     size_t size() const noexcept;
@@ -45,7 +36,6 @@ namespace ravinskij
     ListIterator< T > insert(ListIterator< T > it, const T& value);
     template< class Iterator >
     ListIterator< T > insert(ListIterator< T > it, Iterator start, Iterator finish);
-    //ListIterator< T > insert(ListIterator< T > it, size_t n, const T& value);
     ListIterator< T > insert(ListIterator< T > it, std::initializer_list< T > il);
     bool empty() const noexcept;
     void push_front(const T& value);
@@ -70,25 +60,7 @@ namespace ravinskij
     tail_(nullptr),
     size_(0)
   {}
-  // template< class T >
-  // List< T >::List(const T& value, size_t count):
-  //   List()
-  // {
-  //   for (size_t i = 0; i < count; ++i)
-  //   {
-  //     push_back(value);
-  //   }
-  // }
-  // template< class T >
-  // template< class Iterator >
-  // List< T >::List(Iterator start, Iterator finish):
-  //   List()
-  // {
-  //   while (start != finish)
-  //   {
-  //     push_back(*start++);
-  //   }
-  // }
+
   template< class T >
   List< T >::List(std::initializer_list< T > il):
     List()
@@ -148,63 +120,6 @@ namespace ravinskij
   {
     clear();
   }
-
-  template< class T >
-  bool List< T >::operator<(const List< T >& rhs) const
-  {
-    size_t min_size = std::min(rhs.size_, size_);
-    ListNode< T >* node = head_;
-    ListNode< T >* rhs_node = rhs.head_;
-    for (size_t i = 0; i < min_size; ++i)
-    {
-      if (node->value_ != rhs_node->value_)
-      {
-        return node->value_ < rhs_node->value_;
-      }
-      node = node->next_;
-      rhs_node = rhs_node->next_;
-    }
-    return false;
-  }
-  //template< class T >
-  // bool List< T >::operator>=(const List< T >& rhs) const
-  // {
-  //   return !(*this < rhs);
-  // }
-  // template< class T >
-  // bool List< T >::operator<=(const List< T >& rhs) const
-  // {
-  //   return !(rhs < *this);
-  // }
-  // template< class T >
-  // bool List< T >::operator>(const List< T >& rhs) const
-  // {
-  //   return (rhs < *this);
-  // }
-  template< class T >
-  bool List< T >::operator==(const List< T >& rhs) const
-  {
-    size_t min_size = std::min(rhs.size_, size_);
-    ListNode< T >* node = head_;
-    ListNode< T >* rhs_node = rhs.head_;
-    for (size_t i = 0; i < min_size; ++i)
-    {
-      if (!(node->value_ == rhs_node->value_))
-      {
-        return false;
-      }
-      node = node->next_;
-      rhs_node = rhs_node->next_;
-    }
-    return rhs.size_ == size_;
-  }
-  template< class T >
-  bool List< T >::operator!=(const List< T >& rhs) const
-  {
-    return !(rhs == *this);
-  }
-  
-  
   
   template< class T >
   void List< T >::swap(List< T >& list)
@@ -339,31 +254,6 @@ namespace ravinskij
       throw;
     }
   }
-  //template< class T >
-  // ListIterator< T > List< T >::insert(ListIterator< T > it, size_t n, const T& value)
-  // {
-  //   ListIterator< T > iterator(it);
-  //   size_t count = 0;
-  //   try
-  //   {
-  //     ListIterator< T > result(it.node);
-  //     for (size_t i = 0; i < n; ++i)
-  //     {
-  //       insert(it++, value);
-  //       ++count;
-  //     }
-  //     return ++result;
-  //   }
-  //   catch (const std::exception& e)
-  //   {
-  //     --iterator;
-  //     for (size_t i = 0; i < count; ++i)
-  //     {
-  //       erase(iterator--);
-  //     }
-  //     throw;
-  //   }
-  // }
   template< class T >
   ListIterator< T > List< T >::insert(ListIterator< T > it, std::initializer_list< T > il)
   {
