@@ -164,12 +164,12 @@ void zakozhurnikova::elimination(std::list< std::string >& args, dict& dictionar
   std::string word = args.front();
   args.pop_front();
   std::string translate = args.front();
-  std::list< std::string >& temp = current[word];
+  std::set< std::string >& temp = current[word];
   if (!temp.empty())
   {
     temp.clear();
   }
-  temp.push_back(translate);
+  temp.insert(translate);
   current[word] = temp;
 }
 
@@ -256,7 +256,7 @@ void zakozhurnikova::rider(std::list< std::string >& args, dict& dictionary)
   std::string translate = args.back();
   try
   {
-    std::list< std::string >& temp = current.at(word);
+    std::set< std::string >& temp = current.at(word);
     for (auto it = temp.begin(); it != temp.end(); ++it)
     {
       if (translate == *it)
@@ -265,12 +265,12 @@ void zakozhurnikova::rider(std::list< std::string >& args, dict& dictionary)
         return;
       }
     }
-    temp.push_back(translate);
+    temp.insert(translate);
   }
   catch (const std::out_of_range& e)
   {
-    std::list< std::string > currentTranslate;
-    currentTranslate.push_back(translate);
+    std::set< std::string > currentTranslate;
+    currentTranslate.insert(translate);
     current[word] = currentTranslate;
   }
 }
