@@ -34,6 +34,7 @@ namespace ravinskij
             }
             return *this;
         }
+        
         BoolArray& operator=(BoolArray&& rhs)
         {
             if (this != std::addressof(rhs))
