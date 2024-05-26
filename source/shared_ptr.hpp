@@ -1,100 +1,88 @@
 #ifndef SHARED_PTR_HPP
 #define SHARED_PTR_HPP
 
-#include <cstddef>   // NULL
-#include <algorithm> // std::swap
-
-// can be replaced by other error mechanism
+#include <cstddef>   
+#include <algorithm> 
 #include <cassert>
-#define SHARED_ASSERT(x) assert(x)
 
 namespace ravinskij
 {
-    /**
-     * @brief implementation of reference counter for the following minimal smart pointer.
-     *
-     * shared_ptr_count is a container for the allocated pn reference counter.
-     */
-    class shared_ptr_count
+    class SharedPtrCount
     {
     public:
-        shared_ptr_count() : pn(NULL)
+        SharedPtrCount() : pointersCount(nullptr)
         {
         }
-        shared_ptr_count(const shared_ptr_count &count) : pn(count.pn)
+        SharedPtrCount(const SharedPtrCount &count) : pointersCount(count.pointersCount)
         {
         }
-        /// @brief Swap method for the copy-and-swap idiom (copy constructor and swap method)
-        void swap(shared_ptr_count &lhs) throw() // never throws
+        void swap(SharedPtrCount &lhs) noexcept 
         {
-            std::swap(pn, lhs.pn);
+            std::swap(pointersCount, lhs.pointersCount);
         }
-        /// @brief getter of the underlying reference counter
-        long use_count(void) const throw() // never throws
+        long use_count(void) const noexcept 
         {
             long count = 0;
-            if (NULL != pn)
+            if (nullptr != pointersCount)
             {
-                count = *pn;
+                count = *pointersCount;
             }
             return count;
         }
-        /// @brief acquire/share the ownership of the pointer, initializing the reference counter
         template <class U>
-        void acquire(U *p) // may throw std::bad_alloc
+        void acquire(U *p) 
         {
-            if (NULL != p)
+            if (nullptr != p)
             {
-                if (NULL == pn)
+                if (nullptr == pointersCount)
                 {
                     try
                     {
-                        pn = new long(1); // may throw std::bad_alloc
+                        pointersCount = new long(1); 
                     }
                     catch (std::bad_alloc &)
                     {
                         delete p;
-                        throw; // rethrow the std::bad_alloc
+                        throw; 
                     }
                 }
                 else
                 {
-                    ++(*pn);
+                    ++(*pointersCount);
                 }
             }
         }
-        /// @brief release the ownership of the px pointer, destroying the object when appropriate
         template <class U>
-        void release(U *p) throw() // never throws
+        void release(U *p) noexcept 
         {
-            if (NULL != pn)
+            if (nullptr != pointersCount)
             {
-                --(*pn);
-                if (0 == *pn)
+                --(*pointersCount);
+                if (0 == *pointersCount)
                 {
                     delete p;
-                    delete pn;
+                    delete pointersCount;
                 }
-                pn = NULL;
+                pointersCount = nullptr;
             }
         }
 
     public:
-        long *pn; //!< Reference counter
+        long *pointersCount; 
     };
 
-    class shared_ptr_base
+    class SharedPtrBase
     {
     protected:
-        shared_ptr_base(void) : pn()
+        SharedPtrBase() : pointersCount()
         {
         }
 
-        shared_ptr_base(const shared_ptr_base &other) : pn(other.pn)
+        SharedPtrBase(const SharedPtrBase &other) : pointersCount(other.pointersCount)
         {
         }
 
-        shared_ptr_count pn; //!< Reference counter
+        SharedPtrCount pointersCount; //!< Reference counter
     };
 
     /**
@@ -105,108 +93,108 @@ namespace ravinskij
      * It destroys the object when the last shared pointer pointing to it is destroyed or reset.
      */
     template <class T>
-    class shared_ptr : public shared_ptr_base
+    class shared_ptr : public SharedPtrBase
     {
     public:
         /// The type of the managed object, aliased as member type
         typedef T element_type;
 
         /// @brief Default constructor
-        shared_ptr(void) throw() : // never throws
-                                   shared_ptr_base(),
-                                   px(NULL)
+        shared_ptr(void) noexcept : // never throws
+                                   SharedPtrBase(),
+                                   px(nullptr)
         {
         }
         /// @brief Constructor with the provided pointer to manage
         explicit shared_ptr(T *p) : // may throw std::bad_alloc
                                     // px(p), would be unsafe as acquire() may throw, which would call release() in destructor
-                                    shared_ptr_base()
+                                    SharedPtrBase()
         {
             acquire(p); // may throw std::bad_alloc
         }
         /// @brief Constructor to share ownership. Warning : to be used for pointer_cast only ! (does not manage two separate <T> and <U> pointers)
         template <class U>
         shared_ptr(const shared_ptr<U> &ptr, T *p) : // px(p), would be unsafe as acquire() may throw, which would call release() in destructor
-                                                     shared_ptr_base(ptr)
+                                                     SharedPtrBase(ptr)
         {
             acquire(p); // may throw std::bad_alloc
         }
         /// @brief Copy constructor to convert from another pointer type
         template <class U>
-        shared_ptr(const shared_ptr<U> &ptr) throw() : // never throws (see comment below)
+        shared_ptr(const shared_ptr<U> &ptr) noexcept : // never throws (see comment below)
                                                        // px(ptr.px),
-                                                       shared_ptr_base(ptr)
+                                                       SharedPtrBase(ptr)
         {
-            SHARED_ASSERT((NULL == ptr.get()) || (0 != ptr.use_count()));            // must be coherent : no allocation allowed in this path
+            assert((nullptr == ptr.get()) || (0 != ptr.use_count()));            // must be coherent : no allocation allowed in this path
             acquire(static_cast<typename shared_ptr<T>::element_type *>(ptr.get())); // will never throw std::bad_alloc
         }
         /// @brief Copy constructor (used by the copy-and-swap idiom)
-        shared_ptr(const shared_ptr &ptr) throw() : // never throws (see comment below)
+        shared_ptr(const shared_ptr &ptr) noexcept : // never throws (see comment below)
                                                     // px(ptr.px),
-                                                    shared_ptr_base(ptr)
+                                                    SharedPtrBase(ptr)
         {
-            SHARED_ASSERT((NULL == ptr.px) || (0 != ptr.pn.use_count())); // must be cohérent : no allocation allowed in this path
+            assert((nullptr == ptr.px) || (0 != ptr.pointersCount.use_count())); // must be cohérent : no allocation allowed in this path
             acquire(ptr.px);                                              // will never throw std::bad_alloc
         }
         /// @brief Assignment operator using the copy-and-swap idiom (copy constructor and swap method)
-        shared_ptr &operator=(shared_ptr ptr) throw() // never throws
+        shared_ptr &operator=(shared_ptr ptr) noexcept // never throws
         {
             swap(ptr);
             return *this;
         }
         /// @brief the destructor releases its ownership
-        ~shared_ptr(void) throw() // never throws
+        ~shared_ptr(void) noexcept // never throws
         {
             release();
         }
         /// @brief this reset releases its ownership
-        void reset(void) throw() // never throws
+        void reset(void) noexcept // never throws
         {
             release();
         }
         /// @brief this reset release its ownership and re-acquire another one
         void reset(T *p) // may throw std::bad_alloc
         {
-            SHARED_ASSERT((NULL == p) || (px != p)); // auto-reset not allowed
+            assert((nullptr == p) || (px != p)); // auto-reset not allowed
             release();
             acquire(p); // may throw std::bad_alloc
         }
 
         /// @brief Swap method for the copy-and-swap idiom (copy constructor and swap method)
-        void swap(shared_ptr &lhs) throw() // never throws
+        void swap(shared_ptr &lhs) noexcept // never throws
         {
             std::swap(px, lhs.px);
-            pn.swap(lhs.pn);
+            pointersCount.swap(lhs.pointersCount);
         }
 
         // reference counter operations :
-        operator bool() const throw() // never throws
+        operator bool() const noexcept // never throws
         {
-            return (0 < pn.use_count());
+            return (0 < pointersCount.use_count());
         }
-        bool unique(void) const throw() // never throws
+        bool unique(void) const noexcept // never throws
         {
-            return (1 == pn.use_count());
+            return (1 == pointersCount.use_count());
         }
-        long use_count(void) const throw() // never throws
+        long use_count(void) const noexcept // never throws
         {
-            return pn.use_count();
+            return pointersCount.use_count();
         }
 
         // underlying pointer operations :
-        T &operator*() const throw() // never throws
+        T &operator*() const noexcept // never throws
         {
-            SHARED_ASSERT(NULL != px);
+            assert(nullptr != px);
             return *px;
         }
-        T *operator->() const throw() // never throws
+        T *operator->() const noexcept // never throws
         {
-            SHARED_ASSERT(NULL != px);
+            assert(nullptr != px);
             return px;
         }
-        T *get(void) const throw() // never throws
+        T *get(void) const noexcept // never throws
         {
-            // no assert, can return NULL
+            // no assert, can return nullptr
             return px;
         }
 
@@ -214,15 +202,15 @@ namespace ravinskij
         /// @brief acquire/share the ownership of the px pointer, initializing the reference counter
         void acquire(T *p) // may throw std::bad_alloc
         {
-            pn.acquire(p); // may throw std::bad_alloc
+            pointersCount.acquire(p); // may throw std::bad_alloc
             px = p;        // here it is safe to acquire the ownership of the provided raw pointer, where exception cannot be thrown any more
         }
 
         /// @brief release the ownership of the px pointer, destroying the object when appropriate
-        void release(void) throw() // never throws
+        void release(void) noexcept // never throws
         {
-            pn.release(px);
-            px = NULL;
+            pointersCount.release(px);
+            px = nullptr;
         }
 
     private:
@@ -231,32 +219,32 @@ namespace ravinskij
 
     // comparaison operators
     template <class T, class U>
-    bool operator==(const shared_ptr<T> &l, const shared_ptr<U> &r) throw() // never throws
+    bool operator==(const shared_ptr<T> &l, const shared_ptr<U> &r) noexcept // never throws
     {
         return (l.get() == r.get());
     }
     template <class T, class U>
-    bool operator!=(const shared_ptr<T> &l, const shared_ptr<U> &r) throw() // never throws
+    bool operator!=(const shared_ptr<T> &l, const shared_ptr<U> &r) noexcept // never throws
     {
         return (l.get() != r.get());
     }
     template <class T, class U>
-    bool operator<=(const shared_ptr<T> &l, const shared_ptr<U> &r) throw() // never throws
+    bool operator<=(const shared_ptr<T> &l, const shared_ptr<U> &r) noexcept // never throws
     {
         return (l.get() <= r.get());
     }
     template <class T, class U>
-    bool operator<(const shared_ptr<T> &l, const shared_ptr<U> &r) throw() // never throws
+    bool operator<(const shared_ptr<T> &l, const shared_ptr<U> &r) noexcept // never throws
     {
         return (l.get() < r.get());
     }
     template <class T, class U>
-    bool operator>=(const shared_ptr<T> &l, const shared_ptr<U> &r) throw() // never throws
+    bool operator>=(const shared_ptr<T> &l, const shared_ptr<U> &r) noexcept // never throws
     {
         return (l.get() >= r.get());
     }
     template <class T, class U>
-    bool operator>(const shared_ptr<T> &l, const shared_ptr<U> &r) throw() // never throws
+    bool operator>(const shared_ptr<T> &l, const shared_ptr<U> &r) noexcept // never throws
     {
         return (l.get() > r.get());
     }
@@ -273,7 +261,7 @@ namespace ravinskij
     shared_ptr<T> dynamic_pointer_cast(const shared_ptr<U> &ptr) // never throws
     {
         T *p = dynamic_cast<typename shared_ptr<T>::element_type *>(ptr.get());
-        if (NULL != p)
+        if (nullptr != p)
         {
             return shared_ptr<T>(ptr, p);
         }
