@@ -1,16 +1,14 @@
 #ifndef NODE_HPP
 #define NODE_HPP
 #include <cstddef>
-//#include "sharedPointer.hpp"
-//#include <memory>
-#include "shared_ptr.hpp"
+#include "sharedPtr.hpp"
 
 namespace ravinskij
 {
   struct Node;
 
-  using nodePtr = shared_ptr<Node>;
-  using memberPtr = shared_ptr<Node>;
+  using nodePtr = SharedPtr<Node>;
+  using memberPtr = SharedPtr<Node>;
   struct Node
   {
     size_t frequency;
