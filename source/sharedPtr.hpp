@@ -161,6 +161,10 @@ namespace ravinskij
         SharedPtr(const SharedPtr<U> &ptr): 
             SharedPtrBase(ptr)
         {
+            // if(!((nullptr == p) || (pointer != p)))
+            // {
+            //     throw std::invalid_argument("void reset(T *p): invalid pointer to use")
+            // } 
             assert((ptr.get == nullptr) || (ptr.useCount != 0));            
             acquire(static_cast<T *>(ptr.get())); 
         }
@@ -213,7 +217,7 @@ namespace ravinskij
 
         void reset(T *p) 
         {
-            assert((nullptr == p) || (pointer != p)); 
+            assert((p == nullptr) || (pointer != p)); 
             release();
             acquire(p); 
         }
@@ -241,13 +245,13 @@ namespace ravinskij
 
         T &operator*() const noexcept 
         {
-            assert(nullptr != pointer);
+            assert(pointer != nullptr);
             return *pointer;
         }
 
         T *operator->() const noexcept 
         {
-            assert(nullptr != pointer);
+            assert(pointer != nullptr);
             return pointer;
         }
 
