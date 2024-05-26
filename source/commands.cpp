@@ -389,8 +389,9 @@ void rav::saveEncoding(std::istream& in, encodesTable& encodings)
   {
     throw std::logic_error("No such encoding is provided");
   }
+  
   std::ofstream output(fileName);
-  auto beginIt = currEncoding->second.cbegin();
+  auto beginIt = currEncoding->second.begin();
   auto endIt = currEncoding->second.end();
   output << WriteWrapper{beginIt->first, beginIt->second};
   ++beginIt;

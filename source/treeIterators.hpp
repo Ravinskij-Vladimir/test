@@ -75,6 +75,7 @@ namespace ravinskij
       node_(node)
     {}
   };
+  
   template< class Key, class T, class Compare = std::less< Key > >
   class ConstTreeIterator: public std::iterator< std::bidirectional_iterator_tag, T >
   {

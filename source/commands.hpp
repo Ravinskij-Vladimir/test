@@ -4,7 +4,6 @@
 #include <string>
 //#include <vector>
 #include "BoolVector.hpp"
-#include "boolArray.hpp"
 #include "Node.hpp"
 #include "tree.hpp"
 #include "bilist.hpp"
