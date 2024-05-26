@@ -85,21 +85,6 @@ namespace ravinskij
         freeTreeNodes(root_);
       }
     }
-    // template< typename InputIt >
-    // Tree(InputIt begin, InputIt end):
-    //   comparator_(),
-    //   root_(new TreeNode< Key, T >(-1)),
-    //   size_(0)
-    // {
-    //   try
-    //   {
-    //     createTree(root_, begin, end, size_);
-    //   }
-    //   catch (...)
-    //   {
-    //     freeTreeNodes(root_);
-    //   }
-    // }
     ~Tree()
     {
       freeTreeNodes(root_);
@@ -179,8 +164,7 @@ namespace ravinskij
       std::swap(size_, other.size_);
     }
 
-    template< typename K>
-    iterator find(const K& x)
+    iterator find(const Key& x)
     {
       TreeNode< Key, T >* cur = root_->left_;
       while (cur)
@@ -194,35 +178,20 @@ namespace ravinskij
       return end();
     }
 
-    template< class K >
-    constIterator find(const K& x) const
-    {
-      TreeNode< Key, T >* cur = root_.left_;
-      while (cur)
-      {
-        if (cur->val_.first == x)
-        {
-          return constIterator(cur);
-        }
-        cur = (comparator_(cur->val_.first, x)) ? cur->left_ : cur->right_;
-      }
-      return cend();
-    }
-
-    template< class K >
-    size_t count(const K& x) const
-    {
-      return (find(x) != end());
-    }
-    iterator lower_bound(const Key& key)
-    {
-      TreeNode< Key, T >* cur = findHint(root_->left_, key);
-      if (comparator_(cur->val_.first, key))
-      {
-        return ++iterator(cur);
-      }
-      return iterator(cur);
-    }
+    // template< class K >
+    // constIterator find(const K& x) const
+    // {
+    //   TreeNode< Key, T >* cur = root_.left_;
+    //   while (cur)
+    //   {
+    //     if (cur->val_.first == x)
+    //     {
+    //       return constIterator(cur);
+    //     }
+    //     cur = (comparator_(cur->val_.first, x)) ? cur->left_ : cur->right_;
+    //   }
+    //   return cend();
+    // }
 
     constIterator find(const Key& key) const
     {
