@@ -139,12 +139,11 @@ namespace ravinskij
       return constIterator(root_);
     }
 
-   
-
     bool empty() const noexcept
     {
       return !size_;
     }
+
     size_t size() const noexcept
     {
       return size_;
@@ -178,21 +177,6 @@ namespace ravinskij
       return end();
     }
 
-    // template< class K >
-    // constIterator find(const K& x) const
-    // {
-    //   TreeNode< Key, T >* cur = root_.left_;
-    //   while (cur)
-    //   {
-    //     if (cur->val_.first == x)
-    //     {
-    //       return constIterator(cur);
-    //     }
-    //     cur = (comparator_(cur->val_.first, x)) ? cur->left_ : cur->right_;
-    //   }
-    //   return cend();
-    // }
-
     constIterator find(const Key& key) const
     {
       TreeNode< Key, T >* cur = root_->left_;
@@ -216,6 +200,7 @@ namespace ravinskij
       }
       throw std::out_of_range("No such element");
     }
+
     const T& at(const Key& key) const
     {
       const TreeNode< Key, T >* cur = findHint(root_->left_, key);
@@ -265,17 +250,9 @@ namespace ravinskij
 
     iterator erase(iterator pos)
     {
-      TreeNode< Key, T >* for_del = pos.node_;
+      TreeNode< Key, T >* toDelete = pos.node_;
       ++pos;
-      eraseTreeNode(for_del);
-      return pos;
-    }
-
-    constIterator erase(constIterator pos)
-    {
-      TreeNode< Key, T >* for_del = pos.node_;
-      ++pos;
-      eraseTreeNode(for_del);
+      eraseTreeNode(toDelete);
       return pos;
     }
 
@@ -431,13 +408,13 @@ namespace ravinskij
       rebalanceTree(hint);
       return new_node;
     }
-    void eraseTreeNode(TreeNode< Key, T >* for_del)
+    void eraseTreeNode(TreeNode< Key, T >* toDelete)
     {
-      TreeNode< Key, T >* parent = for_del->parent_;
-      if (!for_del->left_ || !for_del->right_)
+      TreeNode< Key, T >* parent = toDelete->parent_;
+      if (!toDelete->left_ || !toDelete->right_)
       {
-        TreeNode< Key, T >* child = (for_del->left_ ? for_del->left_ : for_del->right_);
-        (for_del == parent->left_ ? parent->left_ : parent->right_) = child;
+        TreeNode< Key, T >* child = (toDelete->left_ ? toDelete->left_ : toDelete->right_);
+        (toDelete == parent->left_ ? parent->left_ : parent->right_) = child;
         if (child)
         {
           child->parent_ = parent;
@@ -446,26 +423,27 @@ namespace ravinskij
       }
       else
       {
-        TreeNode< Key, T >* prev = for_del->left_;
+        TreeNode< Key, T >* prev = toDelete->left_;
         for (; prev->right_; prev = prev->right_);
         TreeNode< Key, T >* prev_parent = prev->parent_;
-        prev->right_ = for_del->right_;
-        if (for_del->right_)
+        prev->right_ = toDelete->right_;
+        if (toDelete->right_)
         {
-          for_del->right_->parent_ = prev;
+          toDelete->right_->parent_ = prev;
         }
-        ((for_del == parent->left_) ? parent->left_ : parent->right_) = prev;
+        ((toDelete == parent->left_) ? parent->left_ : parent->right_) = prev;
         prev->parent_ = parent;
-        if (prev_parent != for_del)
+        if (prev_parent != toDelete)
         {
           prev_parent->right_ = prev->left_;
           prev->left_->parent_ = prev_parent;
-          prev->left_ = for_del->left_;
+          prev->left_ = toDelete->left_;
         }
-        rebalanceTree((prev_parent != for_del) ? prev_parent : prev);
+        rebalanceTree((prev_parent != toDelete) ? prev_parent : prev);
       }
-      delete for_del;
+      delete toDelete;
     }
+    
     template< typename InputIt >
     TreeNode< Key, T >* createTree(TreeNode< Key, T >* root, InputIt begin, InputIt end, size_t& addedCount)
     {

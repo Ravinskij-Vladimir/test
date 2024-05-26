@@ -86,78 +86,78 @@ struct TreeNode
       TreeNode* rotateLeft()
       {
         TreeNode* root = this;
-        TreeNode* new_root = root->right_;
-        root->right_ = new_root->left_;
-        if (new_root->left_)
+        TreeNode* newRoot = root->right_;
+        root->right_ = newRoot->left_;
+        if (newRoot->left_)
         {
-          new_root->left_->parent_ = root;
+          newRoot->left_->parent_ = root;
         }
-        new_root->left_ = root;
-        root->parent_ = new_root;
+        newRoot->left_ = root;
+        root->parent_ = newRoot;
         root->updateHeight();
-        new_root->updateHeight();
-        return new_root;
+        newRoot->updateHeight();
+        return newRoot;
       }
       TreeNode* rotateRight()
       {
         TreeNode* root = this;
-        TreeNode* new_root = root->left_;
-        root->left_ = new_root->right_;
-        if (new_root->right_)
+        TreeNode* newRoot = root->left_;
+        root->left_ = newRoot->right_;
+        if (newRoot->right_)
         {
-          new_root->right_->parent_ = root;
+          newRoot->right_->parent_ = root;
         }
-        new_root->right_ = root;
-        root->parent_ = new_root;
+        newRoot->right_ = root;
+        root->parent_ = newRoot;
         root->updateHeight();
-        new_root->updateHeight();
-        return new_root;
+        newRoot->updateHeight();
+        return newRoot;
       }
       TreeNode* rotateLeftRight()
       {
         TreeNode* root = this;
-        TreeNode* new_root = root->right_->left_;
-        root->right_->left_ = new_root->right_;
-        if (new_root->right_)
+        TreeNode* newRoot = root->right_->left_;
+        root->right_->left_ = newRoot->right_;
+        if (newRoot->right_)
         {
-          new_root->right_->parent_ = root->right_;
+          newRoot->right_->parent_ = root->right_;
         }
-        new_root->right_ = root->right_;
-        root->right_->parent_ = new_root;
-        root->right_ = new_root->left_;
-        if (new_root->left_)
+        newRoot->right_ = root->right_;
+        root->right_->parent_ = newRoot;
+        root->right_ = newRoot->left_;
+        if (newRoot->left_)
         {
-          new_root->left_->parent_ = root;
+          newRoot->left_->parent_ = root;
         }
-        new_root->left_ = root;
-        root->parent_ = new_root;
+        newRoot->left_ = root;
+        root->parent_ = newRoot;
         root->updateHeight();
-        new_root->right_->updateHeight();
-        new_root->updateHeight();
-        return new_root;
+        newRoot->right_->updateHeight();
+        newRoot->updateHeight();
+        return newRoot;
       }
       TreeNode* rotateRightLeft()
       {
         TreeNode* root = this;
-        TreeNode* new_root = root->left_->right_;
-        root->left_->right_ = new_root->left_;
-        if (new_root->left_)
+        TreeNode* newRoot = root->left_->right_;
+        root->left_->right_ = newRoot->left_;
+        if (newRoot->left_)
         {
-          new_root->left_->parent_ = root->left_;
+          newRoot->left_->parent_ = root->left_;
         }
-        new_root->left_ = root->left_;
-        root->left_->parent_ = new_root;
-        root->left_ = new_root->right_;
-        if (new_root->right_)
+        newRoot->left_ = root->left_;
+        root->left_->parent_ = newRoot;
+        root->left_ = newRoot->right_;
+        if (newRoot->right_)
         {
-          new_root->right_->parent_ = root;
+          newRoot->right_->parent_ = root;
         }
-        new_root->right_ = root;
-        root->parent_ = new_root;
+        newRoot->right_ = root;
+        root->parent_ = newRoot;
         root->updateHeight();
-        new_root->left_->updateHeight();
-        new_root->updateHeight();
-        return new_root;
+        newRoot->left_->updateHeight();
+        newRoot->updateHeight();
+        return newRoot;
       }
     };
 }
