@@ -2,8 +2,7 @@
 #define COMMANDS_HPP
 #include <iosfwd>
 #include <string>
-// #include <vector>
-#include "BoolVector.hpp"
+#include "boolVector.hpp"
 #include "Node.hpp"
 #include "tree.hpp"
 #include "bilist.hpp"

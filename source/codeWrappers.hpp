@@ -3,7 +3,7 @@
 
 #include <iosfwd>
 #include <vector>
-#include "BoolVector.hpp"
+#include "boolVector.hpp"
 
 namespace ravinskij
 {

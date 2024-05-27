@@ -1,4 +1,4 @@
-#include "BoolVector.hpp"
+#include "boolVector.hpp"
 #include <stdexcept>
 
 namespace rav = ravinskij;
