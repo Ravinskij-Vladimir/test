@@ -5,7 +5,6 @@
 #include <limits>
 #include <iomanip>
 #include "Node.hpp"
-#include "scopeGuard.hpp"
 
 namespace rav = ravinskij;
 
@@ -62,12 +61,10 @@ constexpr int bitsInByte()
 
 void readAlphabet(std::istream &input, rav::Tree<char, int> &alphabet)
 {
-  rav::ScopeGuard guard(input);
-  input >> std::noskipws;
   char c = 0;
   while (!input.eof())
   {
-    input >> c;
+    c = input.get();
     alphabet[c]++;
   }
 }
@@ -122,10 +119,6 @@ void encodeAndWrite(const rav::encodeMap &table, std::istream &input, std::ostre
   while (!input.eof())
   {
     char c = input.get();
-    if (c == EOF)
-    {
-      break;
-    }
     rav::boolVec x = table.at(c);
     for (size_t n = 0; n < x.size(); n++)
     {
@@ -139,10 +132,6 @@ void encodeAndWrite(const rav::encodeMap &table, std::istream &input, std::ostre
       }
     }
   }
-  if (position != 0)
-  {
-    output << buf;
-  }
 }
 
 void decodeAndWrite(const rav::List<rav::nodePtr>& travers, std::istream &input, std::ostream &output)
@@ -151,9 +140,7 @@ void decodeAndWrite(const rav::List<rav::nodePtr>& travers, std::istream &input,
   rav::nodePtr traverser = root;
   int position = 0;
   char byte = 0;
-  rav::ScopeGuard guard(input);
-  input >> std::noskipws;
-  input >> byte;
+  byte = input.get();
   while (!input.eof())
   {
     bool checkedBitState = byte & (1 << (bitsInByte() - 1 - position));
@@ -167,14 +154,17 @@ void decodeAndWrite(const rav::List<rav::nodePtr>& travers, std::istream &input,
     }
     if (traverser->left == rav::nodePtr() && traverser->right == rav::nodePtr())
     {
-      output << traverser->symbol;
-      traverser = root;
+      if (traverser->symbol != EOF)
+      {
+        output << traverser->symbol;
+        traverser = root;
+      }
     }
     position++;
     if (position == bitsInByte())
     {
       position = 0;
-      input >> byte;
+      byte = input.get();
     }
   }
 }

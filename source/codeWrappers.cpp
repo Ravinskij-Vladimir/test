@@ -1,6 +1,5 @@
 #include "codeWrappers.hpp"
 #include <iostream>
-#include "scopeGuard.hpp"
 #include "delimeter.hpp"
 
 namespace rav = ravinskij;
