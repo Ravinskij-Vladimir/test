@@ -161,7 +161,7 @@ namespace ravinskij
     }
 
     template <class U>
-    SharedPtr(const SharedPtr<U> &ptr): 
+    explicit SharedPtr(const SharedPtr<U> &ptr): 
       SharedPtrBase(ptr)
     {
       // if(!((ptr.get == nullptr) || (ptr.useCount != 0)))

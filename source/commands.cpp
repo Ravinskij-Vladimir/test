@@ -112,10 +112,10 @@ void encodeAndWrite(const rav::encodeMap &table, std::istream &input, std::ostre
   while (!input.eof())
   {
     char c = input.get();
-    rav::boolVec x = table.at(c);
-    for (size_t n = 0; n < x.size(); n++)
+    rav::boolVec temp = table.at(c);
+    for (size_t n = 0; n < temp.size(); n++)
     {
-      buf = buf | x[n] << (bitsInByte() - 1 - position);
+      buf = buf | temp[n] << (bitsInByte() - 1 - position);
       position++;
       if (position == bitsInByte())
       {
