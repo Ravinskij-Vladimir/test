@@ -47,13 +47,6 @@ void rav::printHelp()
   std::cout << "(for the source text, the text name is displayed instead of the encoding).\n";
 }
 
-
-std::ifstream::pos_type getFileSize(const std::string filename)
-{
-    std::ifstream in(filename, std::ios::ate | std::ios::binary);
-    return in.tellg(); 
-}
-
 constexpr int bitsInByte()
 {
   return 8;
