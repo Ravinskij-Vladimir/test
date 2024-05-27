@@ -91,9 +91,9 @@ namespace ravinskij
     }
     Tree& operator=(const Tree& other)
     {
-      Tree new_map(other);
+      Tree newTree(other);
       clear();
-      this->swap(new_map);
+      this->swap(newTree);
       return *this;
     }
     Tree& operator=(Tree&& other)
@@ -334,13 +334,13 @@ namespace ravinskij
       using std::max;
       while (start && start->height_ != -1)
       {
-        int depth_diff = TreeNode< Key, T >::depth(start->left_) - TreeNode< Key, T >::depth(start->right_);
-        if (start->height_ == max(TreeNode< Key, T >::depth(start->left_), TreeNode< Key, T >::depth(start->right_)) && abs(depth_diff) < 2)
+        int depthDiff = TreeNode< Key, T >::depth(start->left_) - TreeNode< Key, T >::depth(start->right_);
+        if (start->height_ == max(TreeNode< Key, T >::depth(start->left_), TreeNode< Key, T >::depth(start->right_)) && abs(depthDiff) < 2)
         {
           return;
         }
         TreeNode< Key, T >* parent = start->parent_;
-        if (abs(depth_diff) > 1)
+        if (abs(depthDiff) > 1)
         {
           start->rotate();
         }
@@ -385,7 +385,7 @@ namespace ravinskij
       }
       delete root;
     }
-    TreeNode< Key, T >* addTreeNode(TreeNode< Key, T >* root, TreeNode< Key, T >* hint, const Key& key, const T& new_val)
+    TreeNode< Key, T >* addTreeNode(TreeNode< Key, T >* root, TreeNode< Key, T >* hint, const Key& key, const T& newVal)
     {
       if (!hint)
       {
@@ -393,20 +393,20 @@ namespace ravinskij
       }
       if (!hint)
       {
-        root->left_ = new TreeNode< Key, T >(0, std::forward< val_t >(std::make_pair(key, new_val)));
+        root->left_ = new TreeNode< Key, T >(0, std::forward< val_t >(std::make_pair(key, newVal)));
         root->left_->parent_ = root;
         return root->left_;
       }
       if (hint->val_.first == key)
       {
-        hint->val_.second = new_val;
+        hint->val_.second = newVal;
         return hint;
       }
-      TreeNode< Key, T >* new_node = new TreeNode< Key, T >(0, std::forward< val_t >(std::make_pair(key, new_val)));
-      (comparator_(hint->val_.first, key) ? hint->right_ : hint->left_) = new_node;
-      new_node->parent_ = hint;
+      TreeNode< Key, T >* newNode = new TreeNode< Key, T >(0, std::forward< val_t >(std::make_pair(key, newVal)));
+      (comparator_(hint->val_.first, key) ? hint->right_ : hint->left_) = newNode;
+      newNode->parent_ = hint;
       rebalanceTree(hint);
-      return new_node;
+      return newNode;
     }
     void eraseTreeNode(TreeNode< Key, T >* toDelete)
     {
