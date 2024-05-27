@@ -8,8 +8,6 @@
 #include "scopeGuard.hpp"
 
 namespace rav = ravinskij;
-//using Node = rav::Node;
-//using nodePtr = std::shared_ptr<rav::Node>;
 
 void rav::printHelp()
 {
@@ -17,10 +15,10 @@ void rav::printHelp()
   std::cout << "Working with encoding and decoding texts from files.\n";
   std::cout << "Example: huffman encode text1 text2 encoding1\n";
   std::cout << "\nWorking with text:\n";
-  std::cout << "\tadd-text\t <text-name> <file>\n"; //\t add text to work with
-  std::cout << "\tsave-text\t <text-name> <file>\n"; //\t write text to the file (content of the file will be overwritten)
-  std::cout << "\tdelete-text\t <text-name>\n"; // \t\t delete text to work with
-  std::cout << "\tprint-text\t <text-name>\n"; // \t\t print the text to the console
+  std::cout << "\tadd-text\t <text-name> <file>\n"; 
+  std::cout << "\tsave-text\t <text-name> <file>\n"; 
+  std::cout << "\tdelete-text\t <text-name>\n"; 
+  std::cout << "\tprint-text\t <text-name>\n";
 
   std::cout << "\nEncoding/decoding:\n";
   std::cout << "\tcreate-encoding\t <text-name> <encoding-name>\t\n";
@@ -72,9 +70,6 @@ void readAlphabet(std::istream &input, rav::Tree<char, int> &alphabet)
     input >> c;
     alphabet[c]++;
   }
-
-  // input.clear();
-  // input.seekg(0); // перемещаем указатель снова в начало файла
 }
 
 void buildHuffmanTree(rav::List<rav::nodePtr> &lst, const rav::Tree<char, int> &alphabet, rav::NodeComparator comp)
@@ -87,7 +82,6 @@ void buildHuffmanTree(rav::List<rav::nodePtr> &lst, const rav::Tree<char, int> &
     lst.push_back(p);
   }
 
-  //////  создаем дерево
   while (lst.size() != 1)
   {
     lst.sort(comp);
@@ -210,13 +204,8 @@ void rav::addText(std::istream& in, fileTable& files)
   {
     throw std::logic_error("Couldn't open file");
   }
-  //copyFile(input, std::cout);
   files.insert({textName, fileName});
   input.close();
-  // for (auto it = files.cbegin(); it != files.end(); it++)
-  // {
-  //   std::cout << it->first << ' ' << it->second << '\n';
-  // }
 }
 
 void rav::saveText(std::istream& in, fileTable& files)
@@ -234,8 +223,6 @@ void rav::saveText(std::istream& in, fileTable& files)
     throw std::logic_error("Couldn't open file");
   }
   copyFile(input, output);
-  // input.close();
-  // output.close();
 }
 
 void rav::deleteText(std::istream& in, fileTable& files)
@@ -351,33 +338,6 @@ void rav::decode(std::istream& in, const traverserTable& traverses, fileTable& f
   rav::List<rav::nodePtr> traverser = traverses.find(encodingName)->second;
   decodeAndWrite(traverser, input, output);
   files.insert({decodedName, decodedName});
-}
-
-
-void rav::addEncoding(std::istream& in, encodesTable& encodings)
-{
-  std::string encodingName, fileName;
-  in >> encodingName >> fileName;
-  if (encodings.find(encodingName) != encodings.end())
-  {
-    throw std::logic_error("Such encoding already exists");
-  }
-  std::ifstream input(fileName);
-  if (!input.is_open())
-  {
-    throw std::logic_error("Couldn't open file");
-  }
-  //input >> encodingName;
-  rav::encodeMap map;
-  while (!input.eof())
-  {
-    char ch = 0;
-    boolVec code;
-    input >> ReadWrapper{ch, code};
-    std::cout << WriteWrapper{ch, code} <<  '\n';
-    map.insert({ch, code});
-  }
-  encodings.insert({encodingName, map});
 }
 
 void rav::saveEncoding(std::istream& in, encodesTable& encodings)

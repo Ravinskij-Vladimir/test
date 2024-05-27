@@ -193,7 +193,7 @@ namespace ravinskij
 
     T& at(const Key& key)
     {
-      TreeNode< Key, T >* cur = findHint(root_->left_, key);
+      TreeNode< Key, T >* cur = findNode(root_->left_, key);
       if (cur && cur->val_.first == key)
       {
         return cur->val_.second;
@@ -203,7 +203,7 @@ namespace ravinskij
 
     const T& at(const Key& key) const
     {
-      const TreeNode< Key, T >* cur = findHint(root_->left_, key);
+      const TreeNode< Key, T >* cur = findNode(root_->left_, key);
       if (cur && cur->val_.first == key)
       {
         return cur->val_.second;
@@ -212,7 +212,7 @@ namespace ravinskij
     }
     T& operator[](const Key& key)
     {
-      TreeNode< Key, T >* cur = findHint(root_, key);
+      TreeNode< Key, T >* cur = findNode(root_, key);
       if (cur && cur->val_.first == key)
       {
         return cur->val_.second;
@@ -224,7 +224,7 @@ namespace ravinskij
 
     std::pair< iterator, bool > insert(const val_t& val)
     {
-      TreeNode< Key, T >* hint = findHint(root_, val.first);
+      TreeNode< Key, T >* hint = findNode(root_, val.first);
       if (hint && hint->val_.first == val.first)
       {
         return std::make_pair(iterator(hint), false);
@@ -271,7 +271,7 @@ namespace ravinskij
     Compare comparator_;
     TreeNode< Key, T >* root_;
     size_t size_;
-    TreeNode< Key, T>* findHint(TreeNode< Key, T >* root, const Key& key)
+    TreeNode< Key, T>* findNode(TreeNode< Key, T >* root, const Key& key)
     {
       TreeNode< Key, T >* cur = (root->height_ < 0) ? root->left_ : root;
       while (cur)
@@ -300,7 +300,7 @@ namespace ravinskij
       return nullptr;
     }
 
-    const TreeNode< Key, T >* findHint(TreeNode< Key, T >* root, const Key& key) const
+    const TreeNode< Key, T >* findNode(TreeNode< Key, T >* root, const Key& key) const
     {
       const TreeNode< Key, T >* cur = (root->height_ < 0) ? root->left_ : root;
       while (cur)
@@ -389,7 +389,7 @@ namespace ravinskij
     {
       if (!hint)
       {
-        hint = findHint(root, key);
+        hint = findNode(root, key);
       }
       if (!hint)
       {
